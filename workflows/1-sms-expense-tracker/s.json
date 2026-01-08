@@ -1,0 +1,853 @@
+{
+  "name": "automated sms expense tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sms-inbox",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        304
+      ],
+      "id": "accc2c39-0896-43b2-b8bd-1972ff045dc0",
+      "name": "Webhook",
+      "webhookId": "2ab957c9-ee6b-41d1-8d8f-6486ae479fc2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ouopeZRd30USOmpU",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "29f1375a-2524-44c5-aa73-d0806d52b6da",
+              "name": "body.sender",
+              "value": "={{ $json.body.sender }}",
+              "type": "string"
+            },
+            {
+              "id": "639df142-b9ae-4ce3-871c-b9dc7f227203",
+              "name": "body.message",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "0dfb95cc-59bd-4daf-830f-072d3e4d4a75",
+              "name": "body.time",
+              "value": "={{ $json.body.time }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1216,
+        304
+      ],
+      "id": "f22f62e1-ffb2-4181-af66-bd357ab1ab23",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Sender: \"{{ $('Edit Fields').item.json.body.sender }}\"\nInput Message: \"{{ $('Edit Fields').item.json.body.message }}\"\nTime: \"{{ $('Edit Fields').item.json.body.time }}\"",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=DONT CALL ANY TOOL/FUNCTION\n\nYou are a precision financial data extractor. I will provide a transaction SMS.\nYour goal is to identify the flow of money: Who sent it, and who received it.\n\nAnalyze the SMS and extract the following fields into a strictly valid JSON object:\n\n1. \"type\": \n   - Return \"DEBIT\" if money left the user's account\n   - Return \"CREDIT\" if money entered the user's account\n   - Return \"UNRELATED\" if the message is not a financial transaction (e.g., OTPs, promotional messages, account statements, balance inquiries, or non-transactional alerts)\n\n2. \"sender_name\": Who sent the money?\n   - If DEBIT: This is the User's Bank Name (e.g., \"HDFC\", \"SBI\") or \"My Account\"\n   - If CREDIT: This is the Person/Merchant sending the money (e.g., \"Ramesh\", \"Google Pay\")\n   - If UNRELATED: Return null\n\n3. \"receiver_name\": Who got the money?\n   - If DEBIT: This is the Merchant or Person paid (e.g., \"Starbucks\", \"Zomato\")\n   - If CREDIT: This is the User's Bank Name\n   - If UNRELATED: Return null\n\n4. \"amount\": \n   - The transaction value (number only)\n   - If UNRELATED: Return null\n\n5. \"time\": \n   - Extract timestamp if available in the SMS\n   - If not available or UNRELATED: Return null\n\n6. \"msg_sent_by\": \n   - The sender ID of the SMS (e.g., \"HDFCBK\", \"SBIINB\")\n   - Extract from SMS metadata if available\n\nRules for Extraction:\n- Remove prefixes like \"UPI/\", \"IMPS/\", \"P2A/\" from names\n- If the bank name is not explicitly mentioned but says \"Your a/c\", use \"My Bank Account\" as the placeholder\n- Ignore balance information\n- Messages about OTPs, offers, KYC updates, balance inquiries, failed transactions, or account statements should be marked as UNRELATED\n\nOutput JSON Schema Examples:\n\nFor transaction messages:\n{\n  \"type\": \"DEBIT\",\n  \"sender_name\": \"HDFC Bank\",\n  \"receiver_name\": \"Starbucks\",\n  \"amount\": 250.00,\n  \"time\": \"2024-01-15 14:30\",\n  \"msg_sent_by\": \"HDFCBK\"\n}\n\nFor unrelated messages:\n{\n  \"type\": \"UNRELATED\",\n  \"sender_name\": null,\n  \"receiver_name\": null,\n  \"amount\": null,\n  \"time\": null,\n  \"msg_sent_by\": \"HDFCBK\"\n}\n\ndont call any tool just give the answer in json"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1856,
+        432
+      ],
+      "id": "a6ed4194-40ff-49ca-9e49-cd6dca5daf48",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1856,
+        656
+      ],
+      "id": "24783d13-6d96-42ce-9975-a861b1eff2a2",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Old70oQmxLC3kMfT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Sender: \"{{ $json.body.sender }}\"\nInput Message: \"{{ $json.body.message }}\"\nTime: \"{{ $json.body.time }}\"\n"
+            },
+            {
+              "content": "You are a precision financial data extractor. I will provide a transaction SMS.\nYour goal is to identify the flow of money: Who sent it, and who received it.\n\nAnalyze the SMS and extract the following fields into a strictly valid JSON object:\n\n1. \"type\": \n   - Return \"DEBIT\" if money left the user's account\n   - Return \"CREDIT\" if money entered the user's account\n   - Return \"UNRELATED\" if the message is not a financial transaction (e.g., OTPs, promotional messages, account statements, balance inquiries, or non-transactional alerts)\n\n2. \"sender_name\": Who sent the money?\n   - If DEBIT: This is the User's Bank Name (e.g., \"HDFC\", \"SBI\") or \"My Account\"\n   - If CREDIT: This is the Person/Merchant sending the money (e.g., \"Ramesh\", \"Google Pay\")\n   - If UNRELATED: Return null\n\n3. \"receiver_name\": Who got the money?\n   - If DEBIT: This is the Merchant or Person paid (e.g., \"Starbucks\", \"Zomato\")\n   - If CREDIT: This is the User's Bank Name\n   - If UNRELATED: Return null\n\n4. \"amount\": \n   - The transaction value (number only)\n   - If UNRELATED: Return null\n\n5. \"time\": \n   - Extract timestamp if available in the SMS\n   - If not available or UNRELATED: Return null\n\n6. \"msg_sent_by\": \n   - The sender ID of the SMS (e.g., \"HDFCBK\", \"SBIINB\")\n   - Extract from SMS metadata if available\n\nRules for Extraction:\n- Remove prefixes like \"UPI/\", \"IMPS/\", \"P2A/\" from names\n- If the bank name is not explicitly mentioned but says \"Your a/c\", use \"My Bank Account\" as the placeholder\n- Ignore balance information\n- Messages about OTPs, offers, KYC updates, balance inquiries, failed transactions, or account statements should be marked as UNRELATED\n\nOutput JSON Schema Examples:\n\nFor transaction messages:\n{\n  \"type\": \"DEBIT\",\n  \"sender_name\": \"HDFC Bank\",\n  \"receiver_name\": \"Starbucks\",\n  \"amount\": 250.00,\n  \"time\": \"2024-01-15 14:30\",\n  \"msg_sent_by\": \"HDFCBK\"\n}\n\nFor unrelated messages:\n{\n  \"type\": \"UNRELATED\",\n  \"sender_name\": null,\n  \"receiver_name\": null,\n  \"amount\": null,\n  \"time\": null,\n  \"msg_sent_by\": \"HDFCBK\"\n}",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        304
+      ],
+      "id": "77cb37eb-1cea-4be8-ba1d-a237746377bd",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "WgXps1e1EEywvWw9",
+          "name": "Google Gemini(PaLM) memer"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7e83a97e-29fa-4ad0-917d-1a6f785ed0a9",
+              "name": "Category",
+              "value": "={{JSON.parse($json.content.parts[0].text).type}}",
+              "type": "string"
+            },
+            {
+              "id": "ee49b002-976d-4d59-8000-5bc24da8dca5",
+              "name": "sender_name",
+              "value": "={{JSON.parse($json.content.parts[0].text).sender_name}}",
+              "type": "string"
+            },
+            {
+              "id": "cfc96c67-ef0f-473e-ba4f-45b10d4a6285",
+              "name": "reciever_name",
+              "value": "={{JSON.parse($json.content.parts[0].text).receiver_name}}",
+              "type": "string"
+            },
+            {
+              "id": "7b515ed2-0c5d-498a-b731-51846a7eff2c",
+              "name": "amount",
+              "value": "={{JSON.parse($json.content.parts[0].text).amount}}",
+              "type": "string"
+            },
+            {
+              "id": "26ad58d2-a315-4323-9a53-c3e9a41f6225",
+              "name": "time",
+              "value": "= {{ $now.toFormat('dd-MM-yy HH:mm:ss') }}\n",
+              "type": "string"
+            },
+            {
+              "id": "7eab1985-4eab-4dd5-94d9-b49da7698457",
+              "name": "sent by",
+              "value": "={{JSON.parse($json.output).msg_sent_by}}",
+              "type": "string"
+            },
+            {
+              "id": "16367e34-739d-45de-a000-dfdcd070eb5f",
+              "name": "date",
+              "value": "= {{ $now.toFormat('dd MMMM yyyy') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2352,
+        288
+      ],
+      "id": "03e21ffc-f806-4f42-9b03-3799ff7ed2cf",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Category }}",
+                    "rightValue": "CREDIT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "afac9b94-93d4-43f8-9976-d085bdd7932f"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "34d92f44-d15d-4447-aace-8428b606245e",
+                    "leftValue": "={{ $json.Category }}",
+                    "rightValue": "=DEBIT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2880,
+        272
+      ],
+      "id": "84885d8e-1e01-4960-a538-8527c494c350",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "62247c2c-b31f-459a-b78f-cb3285e02bcb",
+              "name": "time",
+              "value": "={{ $('Edit Fields1').item.json.time }}",
+              "type": "string"
+            },
+            {
+              "id": "5b11e356-1883-48c9-951a-911f91984f41",
+              "name": "sender_name",
+              "value": "={{ $('Edit Fields1').item.json.sender_name }}",
+              "type": "string"
+            },
+            {
+              "id": "60de041c-6057-4444-b138-156319bd3000",
+              "name": "reciever_name",
+              "value": "={{ $('Edit Fields1').item.json.reciever_name }}",
+              "type": "string"
+            },
+            {
+              "id": "f5b8b7b7-40b8-48cc-b159-556a613426b2",
+              "name": "amount",
+              "value": "={{ $('Edit Fields1').item.json.amount }}",
+              "type": "string"
+            },
+            {
+              "id": "649f5181-b816-4918-b613-f8a440099a0b",
+              "name": "sent by",
+              "value": "={{ $('Edit Fields1').item.json['sent by'] }}",
+              "type": "string"
+            },
+            {
+              "id": "34c7f080-c9cc-4734-8ae8-506ed9871826",
+              "name": "date",
+              "value": "={{ $('Edit Fields1').item.json.date }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3152,
+        192
+      ],
+      "id": "762c3178-c922-47fe-b705-a3dde051afc6",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2d1fa0e4-9fd0-4267-9dee-1ac8e3a6ffd6",
+              "leftValue": "={{ $json.amount }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2560,
+        288
+      ],
+      "id": "54d22d80-adfd-4393-9be1-dacac941842f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "62247c2c-b31f-459a-b78f-cb3285e02bcb",
+              "name": "time",
+              "value": "={{ $('Edit Fields1').item.json.time }}",
+              "type": "string"
+            },
+            {
+              "id": "5b11e356-1883-48c9-951a-911f91984f41",
+              "name": "sender_name",
+              "value": "={{ $('Edit Fields1').item.json.sender_name }}",
+              "type": "string"
+            },
+            {
+              "id": "60de041c-6057-4444-b138-156319bd3000",
+              "name": "reciever_name",
+              "value": "={{ $('Edit Fields1').item.json.reciever_name }}",
+              "type": "string"
+            },
+            {
+              "id": "f5b8b7b7-40b8-48cc-b159-556a613426b2",
+              "name": "amount",
+              "value": "={{ $('Edit Fields1').item.json.amount }}",
+              "type": "string"
+            },
+            {
+              "id": "649f5181-b816-4918-b613-f8a440099a0b",
+              "name": "sent by",
+              "value": "={{ $('Edit Fields1').item.json['sent by'] }}",
+              "type": "string"
+            },
+            {
+              "id": "34c7f080-c9cc-4734-8ae8-506ed9871826",
+              "name": "date",
+              "value": "={{ $('Edit Fields1').item.json.date }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3152,
+        368
+      ],
+      "id": "594ded11-4202-482f-8c83-6fd361fab78a",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1-0528:free",
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        800
+      ],
+      "id": "7bad9ac4-5c08-4f7e-9fc9-d92dc3533dba",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "zUAvvt1betWjDTIo",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7e83a97e-29fa-4ad0-917d-1a6f785ed0a9",
+              "name": "Category",
+              "value": "={{JSON.parse($json.output).type}}",
+              "type": "string"
+            },
+            {
+              "id": "ee49b002-976d-4d59-8000-5bc24da8dca5",
+              "name": "sender_name",
+              "value": "={{JSON.parse($json.output).sender_name}}",
+              "type": "string"
+            },
+            {
+              "id": "cfc96c67-ef0f-473e-ba4f-45b10d4a6285",
+              "name": "reciever_name",
+              "value": "={{JSON.parse($json.output).receiver_name}}",
+              "type": "string"
+            },
+            {
+              "id": "7b515ed2-0c5d-498a-b731-51846a7eff2c",
+              "name": "amount",
+              "value": "={{JSON.parse($json.output).amount}}",
+              "type": "string"
+            },
+            {
+              "id": "26ad58d2-a315-4323-9a53-c3e9a41f6225",
+              "name": "time",
+              "value": "={{ $now.setZone('Asia/Kolkata').toFormat('dd-MM-yy HH:mm:ss') }}\n",
+              "type": "string"
+            },
+            {
+              "id": "ed3811a9-54d2-4d1b-8483-1629eefed5d8",
+              "name": "sent by",
+              "value": "={{JSON.parse($json.output).msg_sent_by}}",
+              "type": "string"
+            },
+            {
+              "id": "80c44c47-f988-462f-952b-9943aad80b5d",
+              "name": "date",
+              "value": "={{ $now.setZone('Asia/Kolkata').toFormat('dd MMMM yyyy') }}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2224,
+        448
+      ],
+      "id": "8460f476-d189-4b1d-b0d4-02402d6228ef",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1NjhUpAvtZgjHdFb9TGQaszehmtn8jUnKdyQbiPaJ2mg",
+          "mode": "list",
+          "cachedResultName": "automated expense tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NjhUpAvtZgjHdFb9TGQaszehmtn8jUnKdyQbiPaJ2mg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1036666997,
+          "mode": "list",
+          "cachedResultName": "sms_expense",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NjhUpAvtZgjHdFb9TGQaszehmtn8jUnKdyQbiPaJ2mg/edit#gid=1036666997"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "time": "={{ $json.time }}",
+            "acc": "={{ $json.reciever_name }}",
+            "msg by": "={{ $json['sent by'] }}",
+            "date": "={{ $json.date }}",
+            "credit": "={{ $json.amount }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "msg by",
+              "displayName": "msg by",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "debit",
+              "displayName": "debit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "credit",
+              "displayName": "credit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "acc",
+              "displayName": "acc",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3664,
+        192
+      ],
+      "id": "902327a1-18da-4ee5-b14f-a39dae663a8c",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1NjhUpAvtZgjHdFb9TGQaszehmtn8jUnKdyQbiPaJ2mg",
+          "mode": "list",
+          "cachedResultName": "automated expense tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NjhUpAvtZgjHdFb9TGQaszehmtn8jUnKdyQbiPaJ2mg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1036666997,
+          "mode": "list",
+          "cachedResultName": "sms_expense",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NjhUpAvtZgjHdFb9TGQaszehmtn8jUnKdyQbiPaJ2mg/edit#gid=1036666997"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "time": "={{ $json.time }}",
+            "acc": "={{ $json.sender_name }}",
+            "msg by": "={{ $json['sent by'] }}",
+            "date": "={{ $json.date }}",
+            "debit": "={{ $json.amount }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "msg by",
+              "displayName": "msg by",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "debit",
+              "displayName": "debit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "credit",
+              "displayName": "credit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "acc",
+              "displayName": "acc",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3664,
+        368
+      ],
+      "id": "80d942ea-f089-4925-b8ec-1e6137fa231f",
+      "name": "Append row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f903e6a9-e457-414a-b02a-f7e46df1a1f2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2880d0215b6f5224db4eab2eb9fb9cb321cfcbfcbf5eb271738a02a54af898b0"
+  },
+  "id": "lP0m8GdNnVqoQGhj",
+  "tags": []
+}

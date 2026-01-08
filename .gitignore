@@ -1,0 +1,32 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Credentials (never commit these!)
+*credentials*
+*secrets*
+*.pem
+*.key
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Node modules (if any tooling is added)
+node_modules/
+
+# Build outputs
+dist/
+build/

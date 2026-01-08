@@ -1,0 +1,3201 @@
+{
+  "name": "linkedin post automated",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.youtube-transcript.io/api/transcripts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Basic 68e1a61c1115f0d0984b2977"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"ids\": [\n    \"{{ $json.video_id }}\"\n  ]\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2960,
+        2128
+      ],
+      "id": "c1cbccc6-7153-4bdf-ac37-ac9f75b08117",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input Example:\n// { \"youtube_url\": \"https://youtu.be/f9HwA5IR-sg?si=pDiEuX_60npA43in\" }\n\nreturn items.map(item => {\n  const url = item.json.youtube_url;\n\n  // Regex to capture YouTube video ID (works for multiple formats)\n  const match = url.match(/(?:youtu\\.be\\/|v=)([a-zA-Z0-9_-]{11})/);\n\n  return {\n    json: {\n      video_id: match ? match[1] : null,\n      original_url: url\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        2128
+      ],
+      "id": "514996b9-9501-4fcb-86e3-0a6f2da6abe0",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6101cc9e-b167-43b2-af9a-84e7f47405ed",
+              "name": "youtube_url",
+              "value": "={{ $json.youtube_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2480,
+        2128
+      ],
+      "id": "8cf6b800-c940-4df7-99a1-9eeb8dce5a18",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\njson: {\nfullTranscript: items[0].json.tracks[0].transcript.map(segment=>segment.text).join(' ')\n}\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3200,
+        2128
+      ],
+      "id": "8b9cf603-bc65-4823-9071-22c0963835f6",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=AI summary:\n{{ JSON.parse($json.content.parts[0].text).summary }}\n\nMy understanding:\n{{ $('Get row(s) in sheet1').item.json['my personal learnings'] }}"
+            },
+            {
+              "content": "Write a LinkedIn post in a casual, storytelling tone with short paragraphs, emojis, sarcasm, and humor.\n\nThe style should sound like a self-aware, slightly chaotic builder/engineer sharing what they just built — full of mini-failures, clever hacks, and proud wins.\n\nTone:\n\nConfident but not braggy, like “I know I’m hacking my way through this, but it works.”\n\nSarcastic humor (e.g. “of course it broke”, “because why would anything work the first time?”).\n\nRelatable chaos — mention errors, weird bugs, accidental genius moments.\n\nShort paragraphs and emojis to keep it skimmable.\n\nEnd with a motivational punchline or takeaway, something like “chaos, but it works.”\n\nContext: It’s a LinkedIn post, so it should be engaging but authentic — not overly polished.\n\ncontext - the user daily posts about his content consumption , so you will be given his story about what he watched and what he understood/learnt from it. So you need to convert that simple understanding and learnings into a Linkedin post which gains a lot of impressions.\n\noutput format : \n{\n\"post_content\" : \"linkedn post content\"\n}",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        3824,
+        2128
+      ],
+      "id": "e4ddd711-c6fb-46fd-a9b8-09b88b47a98b",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "R0UZRjZbXVIm0oNE",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.fullTranscript }}"
+            },
+            {
+              "content": "You are an expert summarizer. Given a YouTube video transcript and its title, create:\n1) A concise 30–40 word summary.\n2) 3 short bullet takeaways (each 8–18 words).\n3) An interest_score 0–10 (10 means extremely actionable/novel/helpful).\nReturn JSON:\n{\"summary\":\"...\",\"bullets\":[\"...\",\"...\",\"...\"],\"interest_score\":7}",
+              "role": "model"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        3488,
+        2128
+      ],
+      "id": "62a0121e-f4e4-4d4b-a328-915fb514d279",
+      "name": "Message a model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "R0UZRjZbXVIm0oNE",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $now.format('DD') }}",
+            "video_id": "={{ $('Code in JavaScript').item.json.video_id }}",
+            "transcript": "={{ $('Code in JavaScript1').item.json.fullTranscript }}",
+            "AI summarization": "={{ JSON.parse($('Message a model1').item.json.content.parts[0].text).summary }}",
+            "Linkedin Post": "={{ $json['Post content'] }}"
+          },
+          "matchingColumns": [
+            "date"
+          ],
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "youtube_url",
+              "displayName": "youtube_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "video_id",
+              "displayName": "video_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI summarization",
+              "displayName": "AI summarization",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "my personal learnings",
+              "displayName": "my personal learnings",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "learnings summarization",
+              "displayName": "learnings summarization",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Linkedin Post",
+              "displayName": "Linkedin Post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4368,
+        2128
+      ],
+      "id": "f970eec5-077f-4598-a13e-dbf5ad26b7f9",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2240,
+        2128
+      ],
+      "id": "85e9a16a-ac5e-4d68-9bfc-e9eb22d403f0",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d04dfc21-3c39-4877-8b05-fe1ceabba8f9",
+              "name": "Post content",
+              "value": "={{ JSON.parse($json.content.parts[0].text).post_content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4160,
+        2128
+      ],
+      "id": "953eef4a-de31-4e22-9ca2-3c8ac69f2f96",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "url": "=https://img.youtube.com/vi/{{ $('Code in JavaScript').item.json.video_id }}/maxresdefault.jpg ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4672,
+        2128
+      ],
+      "id": "19ec1aae-5751-422a-aac9-6e0c930707a0",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "person": "b0dcXf_uwP",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        5200,
+        2128
+      ],
+      "id": "7cd720e4-6839-4d8d-9045-014764683db2",
+      "name": "Create a post",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "nnsZwvo1AHIby4yG",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "68ca3f9e-9aa2-442b-b843-b00754a03437",
+              "leftValue": "={{ $json['post created'] }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        2128
+      ],
+      "id": "de98d9d4-13a0-463e-8317-b7eade7c2a0d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "phoneNumberId": "920673921128974",
+        "recipientPhoneNumber": "+917649010424",
+        "message": "={{ $json.text }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        4928,
+        2128
+      ],
+      "id": "23afbd2f-b0eb-4a39-8a84-be7dd3a0193c",
+      "name": "Send template1",
+      "webhookId": "2b0cd2d5-4781-4121-9056-9bd1fa4f18d0",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "wJuW3EF27ZETofxX",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "caaab8b3-6721-4117-860b-3e295f39ba62",
+              "name": "text",
+              "value": "yes",
+              "type": "string"
+            },
+            {
+              "id": "39310236-0421-48aa-87c3-83ea3128ac9d",
+              "name": "body.title",
+              "value": "={{ $json.body.title }}",
+              "type": "string"
+            },
+            {
+              "id": "911a2f2a-b3ef-4cd5-939a-ba2cd619d9c9",
+              "name": "body.url",
+              "value": "={{ $json.body.url }}",
+              "type": "string"
+            },
+            {
+              "id": "9dc0d2d7-fd2a-4392-beac-dd2b42881d6b",
+              "name": "body.date",
+              "value": "={{ $json.body.date }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2592,
+        3280
+      ],
+      "id": "8c7a1b23-90cc-4212-8720-1657076a7d94",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "youtube-tracker",
+        "options": {}
+      },
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -2800,
+        3280
+      ],
+      "id": "57428be9-237b-4f29-a31a-e0873c1e91d4",
+      "webhookId": "e89e7d93-cb85-4e55-93b7-6de4b820ac0e"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE",
+          "mode": "list",
+          "cachedResultName": "linkedin youtube post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 260397468,
+          "mode": "list",
+          "cachedResultName": "youtube videos tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit#gid=260397468"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "video_title": "={{ $json.Title }}",
+            "video_url": "={{ $json.youtube_url }}",
+            "time": "={{ $now }}",
+            "Transcript": "={{ $json.Transcript }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_title",
+              "displayName": "video_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "relevant",
+              "displayName": "relevant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -496,
+        3392
+      ],
+      "id": "3050b887-d6ab-4c05-a91f-08d04bda4689",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.youtube-transcript.io/api/transcripts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Basic 68e1a61c1115f0d0984b2977"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"ids\": [\n    \"{{ $json.video_id }}\"\n  ]\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1952,
+        3280
+      ],
+      "id": "6e3f21d9-be94-4d64-8cbc-1e2ee7f5f0f0",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input Example:\n// { \"youtube_url\": \"https://youtu.be/f9HwA5IR-sg?si=pDiEuX_60npA43in\" }\n\nreturn items.map(item => {\n  const url = item.json.youtube_url;\n\n  // Regex to capture YouTube video ID (works for multiple formats)\n  const match = url.match(/(?:youtu\\.be\\/|v=)([a-zA-Z0-9_-]{11})/);\n\n  return {\n    json: {\n      video_id: match ? match[1] : null,\n      original_url: url\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2176,
+        3280
+      ],
+      "id": "7f52b346-8626-4edd-8b3d-ac3d2b899866",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "90e08415-d275-43a2-bdee-c94219934aed",
+              "name": "youtube_url",
+              "value": "={{ $json.body.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2384,
+        3280
+      ],
+      "id": "6728fa67-b69d-457f-8ce1-eabb9f0360fe",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "url": "https://api.supadata.ai/v1/youtube/transcript",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "videoId",
+              "value": "={{ $('Code in JavaScript2').item.json.video_id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "sd_f19724e97cdbb84820469044b7732eea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1472,
+        3120
+      ],
+      "id": "532710d0-9c57-41c0-8c2f-337a9a71d785",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const transcriptItems = items[0].json.content;\n\nconst simpleTranscript = transcriptItems\n  .map(segment => segment.text)\n  .filter(Boolean)\n  .join(' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nreturn [\n  {\n    json: {\n      transcript: simpleTranscript\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1072,
+        3200
+      ],
+      "id": "a1d2b12e-5c80-4e52-8e7b-02814e6d03af",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bb56e8bd-cc89-4ae6-8a90-123c2e254606",
+              "leftValue": "={{ $json.tracks }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1744,
+        3280
+      ],
+      "id": "73f6c3f9-a41c-41fa-b396-82d8b19ec392",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f275a0ab-d006-4c7c-84e1-28fa71c896e0",
+              "name": "Transcript",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "da3ccfc7-afa2-4ce5-bf87-68c6b5477d47",
+              "name": "youtube_url",
+              "value": "={{ $('Edit Fields2').item.json.youtube_url }}",
+              "type": "string"
+            },
+            {
+              "id": "095afcb3-d313-4e5a-bb2c-d5611adee870",
+              "name": "Title",
+              "value": "={{ $('Edit Fields').item.json.body.title }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1520,
+        3376
+      ],
+      "id": "44f5a4d7-feb4-4f75-b5ac-dc72a03bde30",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d697d8f3-ca95-4fc6-9f61-2a00692ad84a",
+              "name": "youtube_url",
+              "value": "={{ $('Edit Fields2').item.json.youtube_url }}",
+              "type": "string"
+            },
+            {
+              "id": "e573979d-8e8f-4b91-8515-dfcf460f691b",
+              "name": "Transcript",
+              "value": "={{ $json.transcript }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -896,
+        3200
+      ],
+      "id": "75e0f248-c267-44f4-94eb-72c5698bfb9b",
+      "name": "Edit Fields6"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE",
+          "mode": "list",
+          "cachedResultName": "linkedin youtube post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1072136895,
+          "mode": "list",
+          "cachedResultName": "relevant videos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit#gid=1072136895"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        2128
+      ],
+      "id": "f8548dc2-c071-4264-a439-5994b4df6563",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "1Nq0Rs5BAr3rYDc3",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE",
+          "mode": "list",
+          "cachedResultName": "linkedin youtube post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 260397468,
+          "mode": "list",
+          "cachedResultName": "youtube videos tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit#gid=260397468"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2768,
+        3744
+      ],
+      "id": "4602d94f-dece-4f82-b14b-e4033d73e9e0",
+      "name": "Google Sheets Trigger1",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "1Nq0Rs5BAr3rYDc3",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ad43ab17-fe56-46dd-9412-f12c8dd2dd85",
+              "name": "video_url",
+              "value": "={{ $json.video_url }}",
+              "type": "string"
+            },
+            {
+              "id": "a09b1e82-d09d-427d-8307-d4d3c0664b64",
+              "name": "video_title",
+              "value": "={{ $json.video_title }}",
+              "type": "string"
+            },
+            {
+              "id": "3ad4df22-c309-4321-ac71-588ad6669628",
+              "name": "Transcript",
+              "value": "={{ $json.Transcript }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -464,
+        3808
+      ],
+      "id": "b15e78cc-5e11-43ba-abc2-3d093645f9ac",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=## Input Data:\n- **Title**: {{ $json.video_title }}\n- **URL**: {{ $json.video_url }}\n- **Transcript**: {{ $json.Transcript }}\n\n- **CRITICAL**: Do NOT wrap the JSON in markdown code blocks (```json). Return raw JSON only with no backticks, no \"```json\", no formatting - just the pure JSON object starting with { and ending with }",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are a content analyst for LinkedIn posts. Analyze the provided YouTube video and create comprehensive content insights.\n\n## Input Data:\n- Title: {video_title}\n- URL: {video_url}\n- Transcript: {video_transcript}\n\n## Your Task:\n1. Provide a detailed, comprehensive explanation of what the video is about\n2. Extract and summarize all key concepts and ideas discussed\n3. Identify the main takeaways and learning outcomes\n4. Highlight important examples, use cases, or demonstrations\n5. Explain the practical applications and real-world relevance\n6. Create an engaging hook/summary for LinkedIn sharing\n\n## Output Format:\nReturn ONLY valid JSON with this exact structure:\n\n{\n  \"comprehensive_explanation\": \"Detailed breakdown of the video's main topic, core concepts, and how they interconnect. Explain what the video teaches, why it matters, and the context in which it's relevant. Cover all major sections and key points discussed. This should be 8-10 sentences minimum, going deep into the content.\",\n  \"key_concepts\": [\"concept1\", \"concept2\", \"concept3\", \"concept4\"],\n  \"main_takeaways\": [\"takeaway1\", \"takeaway2\", \"takeaway3\"],\n  \"practical_applications\": \"How can viewers apply what they learned from this video? What real-world problems does it solve or address?\",\n  \"hook\": \"First line: attention-grabbing statement about the video's main insight.\\nSecond line: value proposition - what viewers will learn or gain.\",\n  \"topic\": \"Main subject (max 2 words)\",\n  \"genre\": \"Choose from: Tutorial, News/Update, Opinion/Analysis, Case Study, Interview, Product Demo, Industry Insight, Best Practices\",\n  \"key_examples_mentioned\": [\"example1\", \"example2\", \"example3\"],\n  \"target_audience\": \"Who would benefit most from this content?\",\n  \"depth_score\": \"How technical is this? Beginner/Intermediate/Advanced\"\n}\n\n## Important Guidelines:\n- Provide thorough, detailed explanations - go deep into what the video covers\n- Extract ALL major concepts and ideas, not just surface-level points\n- Explain the 'why' and 'how' behind each concept discussed\n- Make the hook engaging and LinkedIn-appropriate (professional but conversational)\n- Be comprehensive in your analysis - this should serve as a detailed guide to the video's content\n- Return ONLY raw JSON with no markdown code blocks, no backticks, no formatting - just pure JSON starting with { and ending with }"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -880,
+        4240
+      ],
+      "id": "38a7d098-381a-4c71-a6f3-3ac7ee0956cf",
+      "name": "AI Agent",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        4480
+      ],
+      "id": "65d1d324-8640-4236-b3dc-676d4c448b83",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Old70oQmxLC3kMfT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-3.1-405b-instruct:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        4480
+      ],
+      "id": "df6c5d1b-1e41-44d0-8bb7-67349b2f2319",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "zUAvvt1betWjDTIo",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b9c8944a-5e4e-4f98-af2b-98405ce1f55e",
+              "name": "comprehensive_explanation",
+              "value": "={{ JSON.parse($json.output).comprehensive_explanation }}",
+              "type": "string"
+            },
+            {
+              "id": "ccf56317-d88e-4f61-a4c7-c2681c6fd501",
+              "name": "key_concepts",
+              "value": "={{ JSON.parse($json.output).key_concepts}}",
+              "type": "string"
+            },
+            {
+              "id": "57f5524d-d380-4945-9aff-c2e462896bd2",
+              "name": "practical_applications",
+              "value": "={{ JSON.parse($json.output).practical_applications}}",
+              "type": "string"
+            },
+            {
+              "id": "5d9c7e51-cdff-4586-83f1-a28368f6c85a",
+              "name": "main_takeaways",
+              "value": "={{ JSON.parse($json.output).main_takeaways}}",
+              "type": "string"
+            },
+            {
+              "id": "e89f18e1-2d1f-451d-a965-74e757a2631d",
+              "name": "hook",
+              "value": "={{ JSON.parse($json.output).hook}}",
+              "type": "string"
+            },
+            {
+              "id": "8c1705cd-cdf7-48c1-8845-a1417b1a3d7b",
+              "name": "topic",
+              "value": "={{ JSON.parse($json.output).topic}}",
+              "type": "string"
+            },
+            {
+              "id": "43232539-79da-4b50-8e2f-d2751c89d273",
+              "name": "genre",
+              "value": "={{ JSON.parse($json.output).genre}}",
+              "type": "string"
+            },
+            {
+              "id": "a3a08204-1df4-4e4c-927d-6507a12a6d75",
+              "name": "key_examples_mentioned",
+              "value": "={{ JSON.parse($json.output).key_examples_mentioned}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -560,
+        4240
+      ],
+      "id": "594b7218-8ee8-4335-93f7-e6fd8f6a34d5",
+      "name": "Edit Fields7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0282c493-2e59-43c7-bc95-c921d8459196",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1264,
+        3120
+      ],
+      "id": "617e2a9f-1231-4c19-88f2-3f5c9de3f828",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE",
+          "mode": "list",
+          "cachedResultName": "linkedin youtube post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 260397468,
+          "mode": "list",
+          "cachedResultName": "youtube videos tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit#gid=260397468"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "video_title": "={{ $json.Title }}",
+            "video_url": "={{ $json.youtube_url }}",
+            "time": "={{ $now }}",
+            "Transcript": "={{ $json.Transcript }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_title",
+              "displayName": "video_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "relevant",
+              "displayName": "relevant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -704,
+        3200
+      ],
+      "id": "28924586-7751-4078-ba57-aad3b4c373cb",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// This node checks if transcript needs chunking\nconst items = $input.all();\nconst output = [];\n\nfor (const item of items) {\n  const transcript = item.json.Transcript || '';\n  const transcriptLength = transcript.length;\n  const MAX_DIRECT_CHARS = 10000; // ~7500 tokens\n  \n  output.push({\n    json: {\n      ...item.json,\n      needsChunking: transcriptLength > MAX_DIRECT_CHARS,\n      transcriptLength: transcriptLength,\n      // Keep original for routing\n      transcript: transcript\n    }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2736,
+        4352
+      ],
+      "id": "83a84a81-1670-4c66-9332-90f5e01dad30",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split transcript into overlapping chunks\nconst items = $input.all();\nconst output = [];\n\nconst CHUNK_SIZE = 2000; // words per chunk\nconst OVERLAP = 500; // word overlap between chunks\n\nfor (const item of items) {\n  const transcript = item.json.Transcript || '';\n  const words = transcript.split(/\\s+/);\n  \n  // Create chunks with overlap\n  const chunks = [];\n  for (let i = 0; i < words.length; i += CHUNK_SIZE) {\n    const chunk = words.slice(i, i + CHUNK_SIZE + OVERLAP).join(' ');\n    chunks.push(chunk);\n  }\n  \n  // Output one item per chunk\n  chunks.forEach((chunk, index) => {\n    output.push({\n      json: {\n        video_title: item.json.video_title,\n        video_url: item.json.video_url,\n        topic: item.json.topic,\n        genre: item.json.genre,\n        chunkText: chunk,\n        chunkNumber: index + 1,\n        totalChunks: chunks.length,\n        // Store for later aggregation\n        originalItemIndex: item.json.id || 0\n      }\n    });\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2384,
+        4352
+      ],
+      "id": "5a1e9f13-0de2-4867-8baa-ee20c5d71bdc",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Input Data:\n- Chunk: {{ $json.chunkNumber }} of {{ $json.totalChunks }}\n- Transcript Chunk: {{ $json.chunkText }}\n - Video Title: {{ $json.video_title }}\n- Video URL: {{ $json.video_url }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are summarizing a portion of a longer YouTube video transcript. Extract the key points from this chunk.\n\n## Input Data:\n- Chunk: {{ $json.chunkNumber }} of {{ $json.totalChunks }}\n- Video Title: {{ $json.video_title }}\n- Video URL: {{ $json.video_url }}\n- Transcript Chunk: {{ $json.chunkText }}\n\n## Your Task:\nExtract key points from this chunk in 3-5 bullet points.\n\n## Output Format (JSON only, no markdown):\n{\n  \"chunkNumber\": {{ $json.chunkNumber }},\n  \"video_url\": \"{{ $json.video_url }}\",\n  \"video_title\": \"{{ $json.video_title }}\",\n  \"keyPoints\": [\n    \"First key point from this section\",\n    \"Second key point from this section\",\n    \"Third key point from this section\"\n  ],\n  \"notableQuotes\": [\"Any impactful quote if present, otherwise empty array\"],\n  \"mainTopics\": [\"Topic1\", \"Topic2\"]\n}\n\nReturn ONLY raw JSON, no backticks or markdown."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1744,
+        4432
+      ],
+      "id": "1b7724f3-8991-4df4-8c9f-86a9dac286c5",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3a23a3a7-99fe-4ddc-b1fe-c7ca7c0052a7",
+              "leftValue": "={{ $json.totalChunks }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2176,
+        4352
+      ],
+      "id": "1bde6b46-969a-4e1a-bd37-aff1ede0f350",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1920,
+        4336
+      ],
+      "id": "ac08acf3-66d7-4492-bc94-87f439918954",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1840,
+        4576
+      ],
+      "id": "6536ec7d-3791-4967-9baa-315913c61776",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "Old70oQmxLC3kMfT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1-0528:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1664,
+        4608
+      ],
+      "id": "dee74749-3124-4006-9330-159b20f4ebc3",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "zUAvvt1betWjDTIo",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Max characters allowed for transcript\nconst MAX_CHARS = 5000;\n\n// Get all incoming items\nconst items = $input.all();\n\nreturn items.map(item => {\n  const transcript = item.json.Transcript || \"\";\n\n  // If transcript is already small enough\n  if (transcript.length <= MAX_CHARS) {\n    return {\n      json: {\n        ...item.json,\n        truncatedTranscript: transcript,\n        wasTruncated: false,\n        originalLength: transcript.length,\n      }\n    };\n  }\n\n  // Split strategy: start + middle + end\n  const chunkSize = Math.floor(MAX_CHARS / 3);\n\n  const start = transcript.slice(0, chunkSize);\n  const middleStart = Math.max(\n    Math.floor(transcript.length / 2 - chunkSize / 2),\n    0\n  );\n  const middle = transcript.slice(middleStart, middleStart + chunkSize);\n  const end = transcript.slice(transcript.length - chunkSize);\n\n  const truncatedTranscript = `[START]\n${start}\n\n[MIDDLE]\n${middle}\n\n[END]\n${end}`;\n\n  return {\n    json: {\n      truncatedTranscript,\n      wasTruncated: true,\n      originalLength: transcript.length,\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1952,
+        3744
+      ],
+      "id": "b5a72fc4-6095-4cac-87f7-ffbe2ff7107e",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "415ca45f-bb0f-47e9-bb83-202524098136",
+              "name": "time",
+              "value": "={{ $json.time }}",
+              "type": "string"
+            },
+            {
+              "id": "ad43ab17-fe56-46dd-9412-f12c8dd2dd85",
+              "name": "video_url",
+              "value": "={{ $json.video_url }}",
+              "type": "string"
+            },
+            {
+              "id": "a09b1e82-d09d-427d-8307-d4d3c0664b64",
+              "name": "video_title",
+              "value": "={{ $json.video_title }}",
+              "type": "string"
+            },
+            {
+              "id": "3ad4df22-c309-4321-ac71-588ad6669628",
+              "name": "Transcript",
+              "value": "={{ $json.Transcript }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2640,
+        4224
+      ],
+      "id": "649ee020-5d91-48cf-adf3-52d6b7be5599",
+      "name": "Edit Fields8"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Input starts below\nTitle: {{ $('Edit Fields11').item.json.video_title }}\nURL: {{ $('Edit Fields11').item.json.video_url }}\nTranscript:\n{{ $json.truncatedTranscript }}\n",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are an assistant helping me decide whether a YouTube video is worth turning into a LinkedIn post.\n\n### Context\nI post mainly about:\n- Artificial Intelligence\n- Generative AI\n- Machine Learning\n- Software Engineering\n- Developer tools\n- Startups, tech insights, productivity for developers\n- Practical lessons, frameworks, or strong opinions in tech\n\n### Input\nYou will receive:\n- Video title\n- Video URL\n- Partial or truncated transcript\n\n### Task\n1. Decide if this video is relevant for my LinkedIn posting.\n2. Respond strictly in JSON.\n3. Be conservative — say NO if relevance is weak or vague.\n\n### Decision rules\nSay **YES** only if the content includes at least one of:\n- AI / ML / GenAI concepts, tools, workflows, or insights\n- Strong technical learning or practical developer knowledge\n- Clear opinions or lessons worth sharing professionally\n- Industry trends in tech/startups/future of work\n\nSay **NO** if it is:\n- Pure entertainment\n- Vlogs, gaming, reactions, podcasts without strong insights\n- Non-tech or shallow tech mentions\n\n### Output format (strict JSON)\n{\n  \"is_relevant\": true | false,\n  \"confidence\": 0.0 to 1.0,\n  \"primary_topic\": \"AI | GenAI | Software | Startup | Productivity | Other\",\n  \"reason\": \"Short explanation in 1–2 lines\"\n}\n\n**CRITICAL**: Do NOT wrap the JSON in markdown code blocks (```json). Return raw JSON only with no backticks, no \"```json\", no formatting - just the pure JSON object starting with { and ending with }"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1520,
+        3744
+      ],
+      "id": "95c187f4-cd7d-4f81-be72-65f0f9acf972",
+      "name": "AI Agent2",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1600,
+        4016
+      ],
+      "id": "704e7f32-b1b4-4e1a-af24-754e7471f84b",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "Old70oQmxLC3kMfT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-3.1-405b-instruct:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1424,
+        4016
+      ],
+      "id": "738ded8c-14e5-4a15-95f0-0b7e0944479b",
+      "name": "OpenRouter Chat Model2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "zUAvvt1betWjDTIo",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b9c8944a-5e4e-4f98-af2b-98405ce1f55e",
+              "name": "relevant",
+              "value": "={{ JSON.parse($json.output).is_relevant }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1168,
+        3744
+      ],
+      "id": "b8a644c1-1e91-4825-9e78-5d96cdb1015a",
+      "name": "Edit Fields10"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2ba07dfe-1db1-4719-bf98-7ddf725eea53",
+              "leftValue": "={{ $json.relevant }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -960,
+        3744
+      ],
+      "id": "2f26c873-f841-45af-b525-7db3c9391c22",
+      "name": "If5"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE",
+          "mode": "list",
+          "cachedResultName": "linkedin youtube post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 260397468,
+          "mode": "list",
+          "cachedResultName": "youtube videos tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit#gid=260397468"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "relevant": "no",
+            "reason": "={{ JSON.parse($('AI Agent2').item.json.output).reason }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "video_title",
+              "displayName": "video_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "relevant",
+              "displayName": "relevant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -704,
+        3616
+      ],
+      "id": "10aae62f-e2fb-4290-99e4-23be49a98237",
+      "name": "Append row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE",
+          "mode": "list",
+          "cachedResultName": "linkedin youtube post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1072136895,
+          "mode": "list",
+          "cachedResultName": "relevant videos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit#gid=1072136895"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "video_url": "={{ $('Edit Fields11').item.json.video_url }}",
+            "video_title": "={{ $('Edit Fields11').item.json.video_title }}",
+            "Transcript": "={{ $('Edit Fields11').item.json.Transcript }}",
+            "Truncated_summary": "={{ $('Code in JavaScript6').item.json.truncatedTranscript }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video_title",
+              "displayName": "video_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Truncated_summary",
+              "displayName": "Truncated_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "comprehensive_explanation",
+              "displayName": "comprehensive_explanation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "main_takeaways",
+              "displayName": "main_takeaways",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "key_examples_mentioned",
+              "displayName": "key_examples_mentioned",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "target_audience",
+              "displayName": "target_audience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "genre",
+              "displayName": "genre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hook",
+              "displayName": "hook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "practical_applications",
+              "displayName": "practical_applications",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -704,
+        3808
+      ],
+      "id": "216f1543-90db-45f9-a91b-dfddacedcaeb",
+      "name": "Append row in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "summary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -1712,
+        4240
+      ],
+      "id": "82330e48-e631-492f-b54e-1ced5a1e562b",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "summary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1504,
+        4240
+      ],
+      "id": "369201d6-636b-4041-a07d-4752eb466b24",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "output"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        4240
+      ],
+      "id": "c1e8f745-4cb5-4679-af6b-2b66dbf82a23",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "644bd0a9-ca76-4458-9b4f-d005e0e1f2f8",
+              "name": "Transcript",
+              "value": "={{ $json.output }}",
+              "type": "array"
+            },
+            {
+              "id": "c8a42d0c-40bd-4446-9986-8d8e933eac2e",
+              "name": "url",
+              "value": "={{ JSON.parse($json.output[0]).video_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1088,
+        4240
+      ],
+      "id": "ae83d636-df7c-4277-bb7a-93f40245964d",
+      "name": "Edit Fields9"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "415ca45f-bb0f-47e9-bb83-202524098136",
+              "name": "time",
+              "value": "={{ $json.time }}",
+              "type": "string"
+            },
+            {
+              "id": "ad43ab17-fe56-46dd-9412-f12c8dd2dd85",
+              "name": "video_url",
+              "value": "={{ $json.video_url }}",
+              "type": "string"
+            },
+            {
+              "id": "a09b1e82-d09d-427d-8307-d4d3c0664b64",
+              "name": "video_title",
+              "value": "={{ $json.video_title }}",
+              "type": "string"
+            },
+            {
+              "id": "3ad4df22-c309-4321-ac71-588ad6669628",
+              "name": "Transcript",
+              "value": "={{ $json.Transcript }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2240,
+        3744
+      ],
+      "id": "0d108ac5-ddab-4290-9b6c-b679589c2eaf",
+      "name": "Edit Fields11"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE",
+          "mode": "list",
+          "cachedResultName": "linkedin youtube post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1072136895,
+          "mode": "list",
+          "cachedResultName": "relevant videos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit#gid=1072136895"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "video_url": "={{ $('Edit Fields9').item.json.url }}",
+            "comprehensive_explanation": "={{ $json.comprehensive_explanation }}",
+            "main_takeaways": "={{ $json.main_takeaways }}",
+            "key_examples_mentioned": "={{ $json.key_examples_mentioned }}",
+            "genre": "={{ $json.genre }}",
+            "topic": "={{ $json.topic }}",
+            "hook": "={{ $json.hook }}",
+            "practical_applications": "={{ $json.practical_applications }}"
+          },
+          "matchingColumns": [
+            "video_url"
+          ],
+          "schema": [
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_title",
+              "displayName": "video_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Truncated_summary",
+              "displayName": "Truncated_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "comprehensive_explanation",
+              "displayName": "comprehensive_explanation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "main_takeaways",
+              "displayName": "main_takeaways",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "key_examples_mentioned",
+              "displayName": "key_examples_mentioned",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "target_audience",
+              "displayName": "target_audience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "genre",
+              "displayName": "genre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hook",
+              "displayName": "hook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "practical_applications",
+              "displayName": "practical_applications",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        4240
+      ],
+      "id": "07c139cc-e8cb-4133-af95-f7c71ee27e0f",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keep": "lastItems"
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -2480,
+        3744
+      ],
+      "id": "4b16bfba-40f2-4897-aa86-82a5ccc89777",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if transcript length is more than 1000 characters\n\nconst items = $input.all();\nconst output = [];\n\nfor (const item of items) {\n  const transcript = item.json.Transcript || item.json.transcript || '';\n  const transcriptLength = transcript.length;\n  const hasMoreThan1000Chars = transcriptLength > 1000;\n  \n  output.push({\n    json: {\n      ...item.json,\n      transcriptLength: transcriptLength,\n      isLongTranscript: hasMoreThan1000Chars ? 'yes' : 'no',\n      result: hasMoreThan1000Chars ? 'yes' : 'no'\n    }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        3808
+      ],
+      "id": "047d6998-e480-4ec4-914a-3754f9b47c49",
+      "name": "Code in JavaScript7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a85a44ac-87b1-4f20-8202-de05e635223b",
+              "leftValue": "={{ $json.transcriptLength }}",
+              "rightValue": 10000,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "f416b4bc-b915-4d26-8faf-d3305d60fe8c",
+              "leftValue": "={{ $json.result }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -48,
+        3808
+      ],
+      "id": "3965b3ac-d6eb-4707-8b04-4cc9259f5000",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=## Input Data:\n- **Title**: {{ $json.video_title }}\n- **URL**: {{ $json.video_url }}\n- **Transcript**: {{ $json.Transcript }}\n\n- **CRITICAL**: Do NOT wrap the JSON in markdown code blocks (```json). Return raw JSON only with no backticks, no \"```json\", no formatting - just the pure JSON object starting with { and ending with }",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are a content analyst for LinkedIn posts. Analyze the provided YouTube video and create comprehensive content insights.\n\n## Input Data:\n- Title: {video_title}\n- URL: {video_url}\n- Transcript: {video_transcript}\n\n## Your Task:\n1. Provide a detailed, comprehensive explanation of what the video is about\n2. Extract and summarize all key concepts and ideas discussed\n3. Identify the main takeaways and learning outcomes\n4. Highlight important examples, use cases, or demonstrations\n5. Explain the practical applications and real-world relevance\n6. Create an engaging hook/summary for LinkedIn sharing\n\n## Output Format:\nReturn ONLY valid JSON with this exact structure:\n\n{\n  \"comprehensive_explanation\": \"Detailed breakdown of the video's main topic, core concepts, and how they interconnect. Explain what the video teaches, why it matters, and the context in which it's relevant. Cover all major sections and key points discussed. This should be 8-10 sentences minimum, going deep into the content.\",\n  \"key_concepts\": [\"concept1\", \"concept2\", \"concept3\", \"concept4\"],\n  \"main_takeaways\": [\"takeaway1\", \"takeaway2\", \"takeaway3\"],\n  \"practical_applications\": \"How can viewers apply what they learned from this video? What real-world problems does it solve or address?\",\n  \"hook\": \"First line: attention-grabbing statement about the video's main insight.\\nSecond line: value proposition - what viewers will learn or gain.\",\n  \"topic\": \"Main subject (max 2 words)\",\n  \"genre\": \"Choose from: Tutorial, News/Update, Opinion/Analysis, Case Study, Interview, Product Demo, Industry Insight, Best Practices\",\n  \"key_examples_mentioned\": [\"example1\", \"example2\", \"example3\"],\n  \"target_audience\": \"Who would benefit most from this content?\",\n  \"depth_score\": \"How technical is this? Beginner/Intermediate/Advanced\"\n}\n\n## Important Guidelines:\n- Provide thorough, detailed explanations - go deep into what the video covers\n- Extract ALL major concepts and ideas, not just surface-level points\n- Explain the 'why' and 'how' behind each concept discussed\n- Make the hook engaging and LinkedIn-appropriate (professional but conversational)\n- Be comprehensive in your analysis - this should serve as a detailed guide to the video's content\n- Return ONLY raw JSON with no markdown code blocks, no backticks, no formatting - just pure JSON starting with { and ending with }"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        240,
+        3760
+      ],
+      "id": "db6a90c5-8b24-4f9d-a646-7542543bc2cf",
+      "name": "AI Agent3",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        224,
+        4000
+      ],
+      "id": "f25bd38e-4e49-467b-b654-d44b2d60e10c",
+      "name": "Groq Chat Model3",
+      "credentials": {
+        "groqApi": {
+          "id": "Old70oQmxLC3kMfT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-3.1-405b-instruct:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        320,
+        4000
+      ],
+      "id": "42415ac2-dee7-4733-ae01-04bbb7a8012d",
+      "name": "OpenRouter Chat Model3",
+      "credentials": {
+        "openRouterApi": {
+          "id": "zUAvvt1betWjDTIo",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b9c8944a-5e4e-4f98-af2b-98405ce1f55e",
+              "name": "comprehensive_explanation",
+              "value": "={{ JSON.parse($json.output).comprehensive_explanation }}",
+              "type": "string"
+            },
+            {
+              "id": "ccf56317-d88e-4f61-a4c7-c2681c6fd501",
+              "name": "key_concepts",
+              "value": "={{ JSON.parse($json.output).key_concepts}}",
+              "type": "string"
+            },
+            {
+              "id": "57f5524d-d380-4945-9aff-c2e462896bd2",
+              "name": "practical_applications",
+              "value": "={{ JSON.parse($json.output).practical_applications}}",
+              "type": "string"
+            },
+            {
+              "id": "5d9c7e51-cdff-4586-83f1-a28368f6c85a",
+              "name": "main_takeaways",
+              "value": "={{ JSON.parse($json.output).main_takeaways}}",
+              "type": "string"
+            },
+            {
+              "id": "e89f18e1-2d1f-451d-a965-74e757a2631d",
+              "name": "hook",
+              "value": "={{ JSON.parse($json.output).hook}}",
+              "type": "string"
+            },
+            {
+              "id": "8c1705cd-cdf7-48c1-8845-a1417b1a3d7b",
+              "name": "topic",
+              "value": "={{ JSON.parse($json.output).topic}}",
+              "type": "string"
+            },
+            {
+              "id": "43232539-79da-4b50-8e2f-d2751c89d273",
+              "name": "genre",
+              "value": "={{ JSON.parse($json.output).genre}}",
+              "type": "string"
+            },
+            {
+              "id": "a3a08204-1df4-4e4c-927d-6507a12a6d75",
+              "name": "key_examples_mentioned",
+              "value": "={{ JSON.parse($json.output).key_examples_mentioned}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        3760
+      ],
+      "id": "5dd04fda-2370-40a3-83d5-d1ea8ea0e612",
+      "name": "Edit Fields12"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE",
+          "mode": "list",
+          "cachedResultName": "linkedin youtube post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1072136895,
+          "mode": "list",
+          "cachedResultName": "relevant videos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nynVA3G1FKy2W7pJNpBTtcXOA_z-ctLSRuEWQZd_sIE/edit#gid=1072136895"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "video_url": "={{ $('Edit Fields9').item.json.url }}",
+            "comprehensive_explanation": "={{ $json.comprehensive_explanation }}",
+            "main_takeaways": "={{ $json.main_takeaways }}",
+            "key_examples_mentioned": "={{ $json.key_examples_mentioned }}",
+            "genre": "={{ $json.genre }}",
+            "topic": "={{ $json.topic }}",
+            "hook": "={{ $json.hook }}",
+            "practical_applications": "={{ $json.practical_applications }}"
+          },
+          "matchingColumns": [
+            "video_url"
+          ],
+          "schema": [
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_title",
+              "displayName": "video_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Truncated_summary",
+              "displayName": "Truncated_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "comprehensive_explanation",
+              "displayName": "comprehensive_explanation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "main_takeaways",
+              "displayName": "main_takeaways",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "key_examples_mentioned",
+              "displayName": "key_examples_mentioned",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "target_audience",
+              "displayName": "target_audience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "genre",
+              "displayName": "genre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hook",
+              "displayName": "hook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "practical_applications",
+              "displayName": "practical_applications",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        3760
+      ],
+      "id": "b559c93c-c958-4218-bad0-b9d2a137652a",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if transcript length is more than 1000 characters\n\nconst items = $input.all();\nconst output = [];\n\nfor (const item of items) {\n  const transcript = item.json.Transcript || item.json.transcript || '';\n  const transcriptLength = transcript.length;\n  const hasMoreThan1000Chars = transcriptLength > 50000;\n  \n  output.push({\n    json: {\n      ...item.json,\n      transcriptLength: transcriptLength,\n      isLongTranscript: hasMoreThan1000Chars ? 'yes' : 'no',\n      result: hasMoreThan1000Chars ? 'yes' : 'no'\n    }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1232,
+        3408
+      ],
+      "id": "0c5b4fe0-c134-40e3-ae4a-18bee13b6d79",
+      "name": "Code in JavaScript8"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "431dc7f9-1ea2-4a9e-973f-7eabf5a7e310",
+              "leftValue": "={{ $json.transcriptLength }}",
+              "rightValue": 50000,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1040,
+        3408
+      ],
+      "id": "554a93a2-f187-4d0f-9493-6d301332e14f",
+      "name": "If6"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst output = [];\n\nfor (const item of items) {\n  const transcript = item.json.Transcript || item.json.transcript || '';\n  const first1000Chars = transcript.substring(0, 50000);\n  \n  output.push({\n    json: {\n      ...item.json,\n      Transcript: first1000Chars\n    }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        3392
+      ],
+      "id": "586f3266-04c7-48cc-af74-5cd9a0028255",
+      "name": "Code in JavaScript9"
+    }
+  ],
+  "pinData": {
+    "Edit Fields8": [
+      {
+        "json": {
+          "time": "2026-01-06T19:53:37.496-05:00",
+          "video_url": "https://www.youtube.com/watch?v=71lxVyNcLFE",
+          "video_title": "",
+          "Transcript": "हमने एक्चुअली यहां पे फ्लैट ले लिया है। तो यह क्लाउड नाइन है हमारा फ्लैट। यह अभी इंद्र जी निकल रहे होंगे। रुकिए मैं दिखाती हूं। तो यह जो है ना यह स्वर्ग है एक्चुअली। और इसलिए साथियों जीवन में पॉजिटिव थिंकिंग की बहुत बड़ी ताकत होती है। बुरी सी बुरी चीज में भी पॉजिटिव देखा जा सकता है। और आप देख सकते हैं नीचे तक कुछ नहीं दिखाई देगा। नीचे सारे नर्क यात्री रहते हैं। बाकी हम लोग तो स्वर्ग में हैं। अभी बुरी से बुरी चीज में भी पॉजिटिव देखा जा सकता है। इसीलिए मेरी सभी से रिक्वेस्ट है अगर आप पॉल्यूशन को भी पॉजिटिव नजरिए से देखने की कोशिश करेंगे तो उसमें भी कुछ अच्छा ढूंढ पाएंगे। धन्यवाद। कैसे कोई देखेगा पोलुशन में दिख कहां रहा है? ओ हो दोस्तों हिंदुस्तान का एक नागरिक होने की हैसियत से यह कार्यक्रम मेरी सामाजिक जिम्मेदारी की एक विनम्र कोशिश है। मैं अपने दर्शकों को यह यकीन दिलाना चाहता हूं कि किसी भी इंसान को बदनाम करना, किसी के जज्बातों को ठेस पहुंचाना या किसी के ऊपर कोई फैसला सुनाना यह मेरा इरादा नहीं है। हेलो मित्रों। मेरा पहला सवाल सर यही है। आपका गला ठीक है? क्योंकि मेरा गला खराब हो रहा है। माय आईज आर बर्निंग एंड आई एम ट्राइंग नॉट टू क्रैक अ कपल ऑफ रिब्स एंड ट्राइंग नॉट टू कॉफ ऑन कैमरा बट सॉरी। साल 2015 में पीएम मोदी ने देश को विश्व गुरु बनाने के लिए नेशनल एयर क्वालिटी इंडेक्स यानी एयूआई लांच किया था। प्रधानमंत्री ने देश को दिया है नया नेशनल एयर क्वालिटी इंडेक्स। और इस नए एक्यूआई मेजरिंग सिस्टम को ल्च करने के साथ-साथ मोदी जी ने पुराने सिस्टम्स और ग्लोबल सिस्टम्स को कोसते हुए कहा था कि हम उस देश में रहते हैं। जहां प्रकृति को परमेश्वर के रूप में माना गया है। हम जितने प्रकृति के विषय में संवेदनशील हैं, दुनिया हमारे लिए सवालिया निशान खड़ा नहीं कर सकती। इसलिए 2025 आते-आते जब दुनिया हमारे देश की जहरीली एयर क्वालिटी पर सवाल उठाने लगी थी तो हमने विश्व गुरु की हैसियत से ग्लोबल पोलशन स्टैंडर्ड्स, रैंकिंग्स और रिपोर्ट्स को फुल्ली रिजेक्ट कर दिया। आई एम नॉट एग्री विथ योर एनालिसिस। आई एम नॉट एग्री विथ योर इनफार्मेशन फ्रॉम वेयर यू हैव पिक अप दिस टाइप ऑफ़ गार्बेज। आई डू नॉट नो। मोदी शास्त्र में इसे ही थूक कर चाटना कहा गया है। द गवर्नमेंट हैज़ सेड दैट वी विल मेक आवर ओन पोलुशन इन डाइसेस। एंड इफ यू कंपेयर दी पैरामीटर्स व्हिच वी हैव इन एेआई आर मोर रिस्ट्रिजेंट एज कंपेयर टू डब्ल्यूएचओआई एंड दीज़ आर दी हाउ ऑल आर स्टैंडर्ड्स आर एटलीस्ट फोर टू एट टाइम्स हायर देन व्हाट डब्ल्यूhओ प्रिस्क्राइब्स और सजेस्ट सो इज इट टू से दैट इफ वी कांट मीट द ग्लोबल स्टैंडर्ड्स लेट्स रेज आवर स्टैंडर्ड्स सो दैट पीपल कांट इवन क्वेश्चन दैट देखिए क्वेश्चन तो हमें वैसे भी अपनी गवर्नमेंट की जगह फॉरेन रिपोर्ट्स को करना चाहिए जो कहती है कि इंडिया के 60% डिस्ट्रिक्ट्स अपने खुद के नेशनल एयर क्वालिटी स्टैंडर्ड्स मीट नहीं करते। ऑलमोस्ट 70 80% सिटीज रिक्वायर ऑलमोस्ट 50 टू 70% रिडक्शन इन देयर इन अ पर्टिकुलर मैटर एक्सपोज़र इवन टू मीट द गवर्नमेंट ऑफ इंडिया गाइडलाइंस। और अगर WHO स्टैंडर्ड्स के हिसाब से देखें तो इंडिया के 100% डिस्ट्रिक्ट्स में पीएम 2.5 के लेवल्स हेल्थ को खराब करने वाले हैं। पीएम 2.5 ये 2000 माइक्रो ग्राम पर मीटर क्यूब आ रहा है। पीएम 2.5 लेवल दे शुड बी इनफैक्ट फाइव 1 2 3 4 5 2000 तो बहुत ज्यादा हो गया। ओह माय गॉड। क्या बोलेंगे सर? नहीं अब मैं पूछूंगा ऐसा कैसे हुआ। पर मेरे प्यारे देशभक्तों आपने बिल्कुल घबराना नहीं है। बस यह याद रखना है कि मोदी जी ने आखिरी बार 2015 में जब पोल्यूशन का जिक्र किया था तो यह कहा था कि दुनिया पैरामीटर तय करें और हम दुनिया को फॉलो करें। ऐसा नहीं है। सचमुच में इस विषय में हमारी हजारों साल से वो विरासत है। हम विश्व का नेतृत्व कर सकते हैं। ओके ओके थैंक यू। आई डोंट गेट अबाउट द क्वालिटी दिल्ली। एक्चुअली रियल आई टेस्ट इट। अमेरिका लाइक इंडिया मेरी प्रकृति है मैं हर चुनौती को चुनौती देता हूं और मोदी जी ने अपना सपना पूरा करते हुए अब इंडिया को एयर पोल्यूशन में वर्ल्ड लीडर यानी विश्वगुरु बना दिया है। सो इन 2024 आईक्यूआई रिलीज़ द एनुअल लिस्ट ऑफ द वर्ल्ड्स मोस्ट पोल्यूटेड सिटीज। यू नो व्हाट्स क्रेजी आउट ऑफ द 100 मोस्ट पोल्यूटेड सिटीज ग्लोबली 94 आर इन इंडिया 94 भाइयों बहनों ये देश ऐसे नहीं चल सकता ये देश ऐसे नहीं चल सकता है स्टडी शो दैट अ चाइल्ड बोर्न इन दिल्ली टुडे विल लूज 8 टू 10 इयर्स ऑफ देर लाइफ जस्ट फ्रॉम ब्रीथिंग दिस एयर मतलब मैं तो बच्चों वाला नहीं हूं लेकिन मैं आपके बच्चों की चिंता करता हूं और दुनिया की बड़ी-बड़ी कंट्रीज इंडिया की इस अद्भुत लीडरशिप से जेलस होके अपने कंट्रीज के लिए एडवाइज रीज इशू कर रही हैं। वार्निंग देयर सिटीजंस ऑफ द स्टेट ऑफ हेल्थ इमरजेंसी ड्यू टू एयर पोलशन इन इंडिया। जी तो क्या मैं ये कह सकता हूं कि हेल्थ इमरजेंसी का वक्त है ये। आपातकाल जैसी स्थिति है। सीरियस होने की जरूरत है हम सबको। ऐसा इतना इतना कोई चिंता मतलब आपातकाल है और ये कोई एकदम से किसी को घबरा देना ऐसा भी नहीं है। टेंशन मत रखिए ऐसी चीजों का। या इसे कहते हैं बिग डी एनर्जी। बिग डी मतलब बिग डाटा ऑफ कोर्स। नाउ द इंडियन गवर्नमेंट क्लेम्स दैट देयर इज नो कंक्लूसिव नेशनल डेटा एंड दैट इज टू एस्टैब्लिश अ डायरेक्ट कोरिलेशन बिटवीन डेथ्स और डिजीज अकरिंग एक्सक्लूसिवली ड्यू टू एयर पोल्यूशन लेवल्स। अब एक तरफ जहां मोदी सरकार ने साफ कर दिया है कि एयर पोल्यूशन और डेथ्स या एयर पोलुशन और लंग डिजीज के बीच कोई डायरेक्ट कनेक्शन नहीं है। वहीं दूसरी तरफ फॉरेन फंडेड प्रोपेगेंडा मशीनरी केप्ट कमिंग आउट विथ ऑल काइंड्स ऑफ रिपोर्ट्स टू डिफेम माय डियर मोदी गवर्नमेंट। लैंडसेट वर्ल्ड वाइड एकनॉलेज साइंस जनरल हैस इनफैक्ट कम आउट विथ अ स्टडी व्हिच सेस 15 लाख डेथ्स इन इंडिया आर ड्यू टू पोलशन मीनवाइल दी हारवर्ड स्टडी सेड वन थर्ड वन थर्ड ऑफ डेथ्स इन इंडिया एव्री ईयर आर लिंक टू पोलशन दिस आर आल्सो फेल्स प्रोपेगेंडा ऐसे तो ये फॉरेन फंडेड फॉरेन गैंग वाले कल को उठ के बोल देंगे कि सिगरेट कॉज कैंसर तो तो क्या हम वो भी मान लेंगे? द बर्थ ऑफ एवरी चाइल्ड इन दिल्ली इज नाउ स्मोकिंग 20 सिगरेट्स द फर्स्ट डे दे ब्रीथ इन द सिटी ऑफ़ देम। देयर आर किड्स इन दिल्ली हुज लंग्स लिटरली लुक लाइक दे बिलोंग टू 40 ईयर ओल्ड चेन स्मोकर्स। दिल्ली दिल्ली की जनता खुश है। मुझे इतना मालूम है। अब एक आम इंसान अपने शहर की हवा में सिर्फ सांस लेने भर से चाहे सिगरेट्स का कितना ही धुआं क्यों ना फूंक ले। पर पार्लियामेंट के बाहर वाले प्रेमिससेस में अगर कोई अपोजिशन पार्टी का एमपी एक सिगरेट पी ले तो मोदी सरकार के बड़े-बड़े को अपनी हेल्थ की चिंता होने लगती है। कि सार्वजनिक स्थल पर सिगरेट पीना मना सार्वजनिक स्वास्थ्य को बोरा पहुंचा रहे हैं। कोई भी लेकिन हमारा भी स्वास्थ्य खतरे में डाल रहे हो आप। ऐसे पागल बातचीत करते सिगरेट रे ये क्या कर रहे हो भाई? अरे भाई आप गलत बात है। अरे भाई हर रोज 20 सिगरेट आपके बच्चों को बूढ़ों को पिलाई जा रही है। तब तो किसी को मिर्च नहीं लगती। हम एक जलाने की कोशिश कर रहे हैं तो आप कह रहे हैं हंगामा हो गया। ये क्या बात है भाई? अब बात यह है कि चाहे एयर पोल्यूशन पे कोई भी इंटरनेशनल ऑर्गेनाइजेशन या रिसर्चर या हेल्थ एक्सपर्ट कुछ भी बोले। हमें उनकी बात ज्यादा सीरियसली लेने की बिल्कुल जरूरत नहीं है क्योंकि यह एक ऐसा विषय है जो हमारी बपोती है। हमारा हमारी डीएनए है। पूरे विश्व को हम दिखा दिखा सकते हैं कि यह हमारा विषय है। यह हमारी परंपरा है। अब यह परंपरा, प्रतिष्ठा, अनुशासन वाली मैसेजिंग किसी और को समझ आए ना आए पर मोदी जी से मोहब्बत करने वालों को मोदी जी की हर बात मिनट से पहले समझ आ जाती है। कि एक जो है दिल्ली में काफी बढ़ता हुआ नजर आ रहा है। सिर्फ भारत में ही है क्या? चाइना के शघाई में एक बार जा एक बार Google सर्च मारो चीन का 52 एक्यूआई अमेरिका के न्यूयॉर्क सिटी में एक बार Google सर्च मारो अमेरिका का 21 एक्यूआई एक बार Google सर्च मारो आपको पता चल जाएगा किसका ज्यादा है किसका कम है चीन का 52 एक अमेरिका का 21 एक्यूआई भारत का 912 जो चिंता की बात के साथ-साथ बहुत खतरनाक बात भी है। खतरे की घंटी तो है पर मोदी भक्तों को घंटा फर्क नहीं पड़ता क्योंकि जहां एक तरफ मोदी और बीजेपी विरोधी लोग ऐसी बातों से परेशान हो जाते हैं वहीं दूसरी तरफ उनके भक्तों को मोदी जी की कृपा हर जहर से इम्यूनिटी का वरदान प्रदान करती है। हमारी इम्युनिटी बहुत अच्छी है। इम्युनिटी अच्छी है। हमें पोलुशन फर्क नहीं पड़ेगा। अरे हमें कोविड भी नहीं होगा। हम देसी आदमी हैं। अच्छा क्योंकि आप बीजेपी का हां बीजेपी बीजेपी के आदमी भी हैं। मैं हमेशा बीजेपी को सपोर्ट करूंगा। बीजेपी नहीं होगा। बिल्कुल बिल्कुल बिल्कुल ऐसा सिर्फ बीजेपी में ही संभव है? हर हर महादेव। ऐसे ही एक महान कट्टर धार्मिक भाजपा के नेता ने देश को यह भी समझाया कि पोल्यूशन तो छोटी-मोटी चीज है। देश के नागरिकों के लिए बड़ा खतरा एक्चुअली कुछ और है। तो हवा के प्रदूषण से ज्यादा दिमाग में जो मैकाले मार्क्स और माओ का प्रदूषण आकर बैठ गया है। यह देश के लिए ज्यादा बड़ी चुनौती है। और इस सबसे बड़ी खतरनाक चुनौती का सामना करना बीजेपी की हर सरकार को आ गया है। और इसका सबसे प्राइम एग्जांपल हमें दिल्ली में देखने को मिला। जहां की चीफ मिनिस्टर रेखा गुप्ता जी ने मकौले, मार्क्स और माओ की मानसिकता वाले यानी मोदी और बीजेपी से सवाल पूछने वाले कॉमन सेंसिकल लोगों को हर बार की तरह मुंहत जवाब दिया। क्या है कि हरियाणा में सरकार आपकी है, यूपी में सरकार आपकी है, राजस्थान में सरकार आपकी है, तो तीनों तरफ से दिल्ली के इर्द-गिर्द जो राज्य हैं, उनमें सरकारें आपकी हैं। पोल्यूशन कब कम होगा? आपकी नहीं है भाई बीजेपी की है। आपकी नहीं है। बीजेपी की सरकारें हैं। आपकी नहीं है। बीजेपी की सरकारें हैं। और बाय गॉड रेखा जी की ऐसी फनी पंच लाइन सुनके मेरी तो हंसते-हंसते खांसी निकल गई है। मोदी जी की कसम। ये जो आप इतना खांस रही हैं, यह भी केजरीवाल जी की देन तो नहीं है। दिल्ली वालों को बहुतों को खांसी देके गए हैं वो। उस ऑफिस में बैठी हूं। पता नहीं हो सकता है कुछ कीटाणु छोड़ दे। ऐसे ही पॉलिटिकल कॉमेडी स्किल्स के चलते अगर कुणाल कामरा जैसे कोई कॉमेडियन दिल्ली में आकर पॉलिटिकल जोक सुनाना चाहे तो रेखा जी उन्हें साफ-साफ शब्दों में बता देती है कि अपने रिस्क पे आए। 2014 में मोदी जी के पीएम बनने के बाद बीजेपी की पहली फीमेल चीफ मिनिस्टर का क्रिएटिव स्किल सेट सिर्फ कॉमेडी तक सीमित नहीं है। वो वर्ल्ड प्ले जोक्स के अलावा शायरी सुनाना भी बहुत पसंद करती हैं। एक शेर कहना चाहूंगी कि शाख से टूटे हुए पत्ते नहीं है हम। शाख से टूटे हुए पत्ते नहीं है हम। आंधियों से कहो अपनी औकात में रहें। क्या बात है। वाह वाह वाह। आंधियों से कहो कि अपनी औकात में। यह शेरो शायरी भी करती है। यह आपका नया रूप मुझे नहीं पता था। कि बागवान ने भी न जाने कैसे-कैसे शौक पाल रखे हैं। फूलों के गमलों में कांटे संभाल रखे हैं। और इस सियासत में तो चित्त भी इनकी पट भी उनकी। हमने क्या बेवजह सिक्के उछाल रखे हैं। तो बेवजह सिक्के उछालने की जगह पहले तो रेखा जी ने बेवजह करोड़ों रुपए ऑफ टैक्स पेयर्स मनी उछाल के क्लाउड सीडिंग जैसा फेल्ड एक्सपेरिमेंट करवाया। अरविंद केजरीवाल सरकार को क्लाउड सीडिंग कराने की परमिशन नहीं मिली थी। कहा गया कि सर्दियों में दिल्ली में बारिश के लिए जरूरी बादल ही नहीं बनते। अगर बादल बन भी जाए तो नीचे की सूखी हवा में बारिश की बूंदे जमीन तक पहुंचने से पहले ही उड़ जाती हैं। साथ ही क्लाउड सीडिंग में इस्तेमाल होने वाले केमिकल के नुकसान को लेकर के भी चिंता जताई गई थी। लेकिन सरकार बदलते ही साल भर के भीतर एक-एक करके सभी मंजूरियां मिल गई। हमने क्या बेवजह सिक्के उछाल रखे हैं? और फिर एक्यूआई मॉनिटरिंग स्टेशंस पे टैक्स पेयर मनी का पानी उछल के पोल्यूशन कंट्रोल करने का मास्टर स्ट्रोक खेला कि जहांजहां आपके मॉनिटर लगे हुए हैं वहां पर ही जाकर के सारा छिड़काव हो जाता है। यहां पर लगातार पानी का छिड़काव किया जा रहा है और यह एयर क्वालिटी मॉनिटरिंग स्टेशन जहांगीरपुरी का है। कोई मॉनिटर पे करके एक्यूआई डाउन होता है क्या? और एक्यूआई एक ऐसा आपका टेंपरेचर है आपको जो किसी भी इंस्ट्रूमेंट से पता चलता है तो उसमें वाटरिंग इज द ओनली सॉल्यूशन नो ये है हमारे 7000 लीटर की गाड़ी है ये हमारे को 6 घंटे हमारे को यहां पे लगातार पानी चलता रहता है लगातार पानी चलता रहता है हमारा और छिड़काव में किस बात का ध्यान रखते हैं आप नहीं स्टेशन के आसपास में थोड़ा सा ज्यादा छिड़काव करते हैं जहां सबसे ज्यादा पोलशन होगा वहीं तो आप सफाई करेंगे मीटर पे तो नहीं मार रहे आप जाके पानी रेखा जी आंखों में धूल नहीं झोंकती बल्कि पानी के छींटों से सबकी आंखें खोल देती हैं। पर विजिबिलिटी जीरो हो तो आंख खोल कर भी क्या ही देख लोगे। इट्स गेटिंग वर्स एंड वर्स आई एम फ्रॉम दिल्ली। सो आई नो व्हाट इट यूज्ड टू बी अर्लियर एंड इट्स जस्ट गेटिंग वर्स एंड या वी समथिंग नीड्स टू बी डन टू स्टॉप इट। अदरवाइज वी वोंट बी एबल टू सी ईच अदर। स्टैंडिंग नेक्स्ट टू ईच अदर। इट वुड रीच दैट पॉइंट। मैं दो दिन मुश्किल से रहता हूं। आई हैव इन्फेक्शन होगा। यह दिल्ली पूरा प्रदूषण क्षेत्र से। हे ऐसा क्यों बोल रहे हो भाई? अब देश में इतनी मजबूत बीजेपी सरकार को पावर में बनाए रखने के लिए आप अपनी थोड़ी बहुत जान भी नहीं दे सकते क्या? आई डायरेक्टली फेल्ट इंपैक्टेड बिकॉज़ दिस फर्स्ट टाइम आई एम आल्सो नॉट वाकिंग इन द इवनिंग्स। आई एम नॉट आउट इन द इवनिंग्स फॉर मॉर्निंग वॉक्स। एंड आई सडनली रियलाइज व्हाई इज़ द प्राइम मिनिस्टर नॉट लीडिंग इट। लीडिंग द चार्ज। व्हाट स्टॉप्स द ऑनरेबल प्राइम मिनिस्टर टू एड्रेस द नेशन। व्हाई शुड एवरीथिंग रेस्ट एट द प्राइम मिनिस्टर? व्हाई शुड एवरीथिंग रेस्ट एट द प्राइम मिनिस्टर? बिकॉज़ द पोलशन एंड हेल्थ इज अ नेशनल इशू। नथिंग कुड बी मोर सीरियस प्रॉब्लम। वी आर ऑल क्राइंग आउट फॉर हेल्प। हे ऐसा क्यों बोल रहे हो भाई? और जब आम लोगों ने अपने एक्यूआई मीटर्स निकाल के टेंपरेचर सॉरी पोलशन नापना शुरू किया तो सरकारी फिगर्स से डबल रीडिंग दिख रही थी। और इस कन्फ्यूजन को क्लियर करते हुए दिल्ली के एनवायरमेंट मिनिस्टर ने लोगों को यह समझाया कि आप अपने मीटर लेके चले जाएंगे तो मैं उसमें कुछ कर नहीं चाहता। अगर आपका एजेंडा कुछ डिफरेंट होगा कुछ पेश करने का तो मैं उसमें कुछ नहीं कर सकता। देखिए आपका एजेंडा कुछ होगा मैं उस एजेंडे में कुछ नहीं कर पाऊंगा। वो आपका एजेंडा आप जैसे मर्जी पेश करिए। लेकिन आपका कुछ एजेंडा अलग होगा मैं उस पे नहीं बहस आपसे कर सकता। लेकिन आपका कुछ एजेंडा अलग होगा। मैं उस पे नहीं बहस आपसे कर सकता। हां, बहस तो ज्यादा इंपॉर्टेंट इश्यूज पे होनी चाहिए। जैसे नेशनल सॉन्ग की हिस्ट्री। पंडित नेहरू जी ने तो वंदे मातरम को छांट दिया था, काट दिया था। उन्होंने दो स्टैंजा तक सीमित कर दिया था। वंदे मातरम के साथ विश्वासघात क्यों हुआ? बंकिम दा का ये भाव सूत्र अच्छा आप बंकिम दाम बाबू बंकिम बाबू बोले थैंक यू थैंक यू थैंक यू थैंक यू थैंक यू हो क्या रहा है हो क्या रहा है तो ये हो क्या रहा है मुझे भी नहीं पता तो जहां एक तरफ हमारे प्राइम मिनिस्टर WhatsApp हिस्ट्री का ज्ञान उठाकर कांग्रेस का गेम कर रहे थे वहीं दूसरी तरफ इंडिया के एनवायरमेंट मिनिस्टर पार्लियामेंट में यह क्लेम कर रहे थे 2025 के दौरान दिल्ली दिल्ली में एक भी दिन एक्यू 450 नहीं हुआ है। हम उसको कंट्रोल रखने में सक्षम हुए हैं। रियली ही सेड दैट ही सेड दैट ओह गॉड के झूठ पे झूठ, झूठ पे झूठ, झूठ पे झूठ ये जो सिलसिला चला है, बस उसका मजा लीजिए। आनंद लीजिए। टेंशन मत रखिए ऐसी चीजों का। और डाटा मैनपुलेशन सॉरी डाटा कॉन्टेक्स्चुअलाइजेशन में दिल्ली की जीनियस सीएम ने एक और बेहतरीन टैक्टिक का प्रदर्शन करते हुए एक्यूआई के बारे में पूरे कॉन्फिडेंस से कुछ ऐसे अमेजिंग क्लेम्स कर डाले। पिछले जो सरकारों के दौरान दिवाली वाले दिन का जो डाटा था और अगले दिन का डाटा था। हमारे कार्यकाल में वो डाटा कम हुआ। इंडियन एक्सप्रेस ने सीपीसीबी के ही आंकड़ों के सहारे बताया कि पिछले साल दिवाली के दिन दिल्ली का एक 328 था जो इस दफा 345 हो गया। बढ़ा नहीं है। कतई नहीं बढ़ा है। जब भी मुंह खोलते हैं धाड़ धाड़ धाड़ धाड़ धाड़ AK-47 की तरह बस झूठ ही निकलता शुरू हो जाता है। मैं झूठ बोलती नहीं हूं। तो रेखा जी ने यह झूठे एक्यूआई फिगर्स वाला ब्रह्मास्त्र दिवाली पर पटाखे अलऊ करने के अपने फैसले को जस्टिफाई करने के लिए खेला था। क्योंकि हम राम जी के काज तो राम जी हमारे काज और साथ ही साथ रेखा जी ने शायद उसी जादू को यूज करते हुए पीक दिवाली आवर्स में से 13 घंटे का 39 में से 31 एक्यूआर मॉनिटरिंग स्टेशंस का डाटा गायब करवा दिया था। मैं ईश्वर की इतनी प्यारी बेटी हूं। अब रेखा जी के इस मैजिकल स्किल को अप्रिशिएट करने की जगह जो लोग एंटी हिंदू हैं वही इस डाटा फजिंग के पीछे का लॉजिक पूछने लगेंगे। लॉजिक ढूंढ रहे हैं बातों में लॉजिक लॉजिक ग्रीन पटाखा में बड़ा लॉजिक था हैं कि वो आसमान में जाके पालक हो गई। हैं? क्या सोच रहे थे तुम? ग्रीनरी हो जाएगी आसमान में। सबसे पहली बात ये एंटी हिंदू है। ये एंटी हिंदू है। कोई बंदा बोल देता है कि दिवाली पे पटाखे मत जलाओ। कह रहा है बकरा ईद पे बोल। वो बकरा मेरी छत पे उड़के थोड़ी आ रहा है। पोलुशन आ रहा है। और फेस्टिवल्स की तो ऐसी शौकीन है हमारी रेखा गुप्ता जी कि दिवाली पर पटाखों के धुएं से हवा भरवा दी थी और छठ पूजा के लिए यमुना केमिकल्स से। सो व्हाट द गवर्नमेंट डीड ड्यूरिंग छठ पूजा वाज़ नॉट क्लियरिंग दीज़ पोलुटेंट्स फ्रॉम द रिवर बट ऑल दे डीड वाज़ फ्रे केमिकल ऑन द सरफेस ऑफ़ द रिवर टू शो यू दैट इट्स ऑल गुड एंड देयर इज नो फोम। हमने कुछ भी डाल के साफ किया साफ हो गई। नो। दिस इज हाउ इट लुक्ड दैट टाइम। एंड दिस इज हाउ इट लुक्स टुडे। छठ का व्रत आ गया है। छठ का त्यौहार आ गया है। बिहार में चुनाव है तो जल्दी-जल्दी घाट थोड़ी ना कर दिए हैं। नहीं मेकअप नहीं किए हैं। भाई ये इसका मेकअप नहीं हो सकता है। सफाई हो सकती है। तो सफाई करिए तो क्या बुरा किया है? और ऐसी टेंपरेरी सुपरफिशियल सफाई के साथ-साथ मोदी जी के लिए तो साफ पानी का अलग सेक्शन भी बनवा दिया था। नकली यमुना प्रधानमंत्री नरेंद्र मोदी के लिए बनाई गई है। आप अपनी स्क्रीन पर देख सकते हैं कि यहां पर आर्टिफिशियल पोंड बनाया गया है। ये झूठ है। ये औरंगजेब और अकबर के चहेते बोल रहे हैं। तो ये जो पानी है ये यमुना से नहीं आ रहा है। वो एक्चुअली सोनिया विहार का जो पाइपलाइन है वहां से वो पानी ले जाया जा रहा है। 2014 में मैंने सोचा था कि प्रधानमंत्री हैं अच्छे हैं। लेकिन अभी 2025 में पता चल गया कि मेरे को कितना बेवकूफ बनाया। और इतना गुस्सा इतना गुस्सा है कि मत पूछिए। पर यह सब छोड़िए। भाजपा सपोर्टर्स ने तो यमुना की सफाई के क्लेम की नदी में झट से डुबकी मार ली थी। पूरे भाजपा का जो प्रोपेगेंडा है दूध का दूध पानी का पानी हो रहा है। यह रहा आपके सामने भरी हुई बोतल है। जनाब पी के दिखाएं। लेकिन ये लोग जो हैं ये यमुना जी को एक सेकंड। नहीं पी पूरा पी के दिखाइए। अरे पूरा मेरी मर्ज़ी। अरे नाटक पूरा मेरी मर्जी नाटक की बात है। पूरा एक सेकंड एक सेकंड। एक सेकंड एक सेकंड। पूरा मर्जी ये देखिए। आम नागरिक पी रहे हैं। हो क्या रहा है? हो क्या रहा है ये। श्रद्धा होती है। ना पीने को लोग गंगा का पानी ना पिए और पीने को यह भी पिए। अब यह बात तो रेखा जी ने सही कही है कि आखिर में सारी बात आकर श्रद्धा पर रुक जाती है। इसीलिए एक इंसान को जो गंदा नाला दिखता है उसे दूसरा पवित्र नदी मान लेता है। एंड वाइसवरसा वेनिस गए आप? नहीं मैं नहीं गया। मुझे मौका नहीं मिल पाया। मैं भी नहीं गई। तो दिल्ली में वो आएंगे। जब वो रिवर जो दिखती है और उस पे वो जो बोट चलती है क्या है? वो नदी है। वो भी नाला है। वेनिस की नदी का नाम बदलकर नाला करने वाली रेखा जी की पार्टी के दिल्ली के एमपी ने एक ऐसी ही गजब स्कीम सजेस्ट की है। जिससे दिल्ली की हवा में से जहर साफ हो जाएगा। दिल्ली के ग्राउंड वाटर लेवल्स देश में लोएस्ट से हाईएस्ट बन जाएंगे और दिल्ली के पानी में भरे यूरेनियम की टॉक्सिसिटी हेल्दी मिनरल्स में कन्वर्ट हो जाएगी। दिल्ली के गार्बेज के पहाड़ पेड़ों से भर जाएंगे और दिल्ली की टूटी सड़कें सेल्फ फील करना सीख जाएंगी। बड़ी खबर हम आपको बता रहे हैं। दिल्ली का नाम इंद्र भ्रस्त करने की मांग है। बीजेपी सांसद प्रवीण खंडेलवाल ने गृह मंत्री अमित शाह को एक पत्र लिखा है। दूसरा सलूशन मिल गया है कि दिल्ली का नाम इंद्रप्रभस्त करने वाले हैं? तो आपसे पूछेगा दिल्ली में पोलुशन है ही नहीं। दिल्ली है ही नहीं। पोलशन का इंद्रप्रभस्त है। पोलशन तो दो। ओके। ओके। थैंक यू। तो मेरे दिल्ली वालों क्या आपने कभी यह सपने में भी सोचा था कि विश्व गुरु की कैपिटल के सारे डेडली प्रॉब्लम्स का इतना इनोवेटिव सॉल्यूशन आपको इतनी आसानी से मिल जाएगा? नेवर कभी नहीं सोचा। खैर ऐसी वर्ल्ड क्लास एक्यूआई सॉरी आईक्यू वाला सुझाव सुनके दिल्ली का सबसे इंटेलेक्चुअल विंग यानी संघी अंकल्स इस आईडिया से ऐसे खुश हुए जैसे मोदी जी ने फ्री बी के तौर पर उनके बच्चों को एडिशनल लाइफ एक्सपेक्टेंसी के 10 साल दे दिए हो। लेकिन इंद्रप्रस्थ नाम था दिल्ली का तो इंद्रप्रस्थ नाम ही होना चाहिए। जो ये देश हिंदुत्व का है तो हिंदुत्व के नाम होने चाहिए। हिंदुओं का देश है। हम हिंदुओं के नाम रखे जाए। हिंदुस्तान में नाम चेंज नहीं अभी कहां होगा भाई? पाकिस्तान में होगा। ये बिल्कुल चेंज होना चाहिए और बिल्कुल चाहिए। हम अपने सोवनिटी में रह रहे हैं। अपने देश में रह रहे हैं। हम जो चाहेंगे वो करेंगे और हम जो हिंदू स्टेट हमारा था अब बनने जा रहा है तो उसे बना के छोड़ेंगे उसको। अब नफरती अंकलों की फेवरेट पार्टी भाजपा ने नफरती अंकलों की फेवरेट फिटिश पूरी करने का प्लान सक्सेसफुल करने के लिए गली-गली नफरती बाबाओं की फौज को यात्राओं पर निकाल दिया है। और हिंदुओं यदि तुम एकता करोगे तो भारत हिंदू राष्ट्र होकर के रहेगा। कौन-कौन भारत हिंदू राष्ट्र चाहता है? डोगे तो नहीं। पीछे हटोगे तो नहीं। भाग तो ना जाओगे। और मोदी के न्यू इंडिया में देश को जहरीली हवा और जहरीले पानी के साथ-साथ मोदी जी ने कंसिस्टेंसी मेंटेन करते हुए बाबा भी जहरीले दिए हैं। मेरे छोटे भाई धीरेंद्र शास्त्री जी एक हमको अमर अकबर एंथनी नाम की कोई फिल्म है। तो हमको एक बहुत अच्छी बात उसकी लगी है। तीन मित्र थे। एक मित्र मंदिर जाता है। एक मंदिर एक व्यक्ति मस्जिद जाता है। एक व्यक्ति चर्च जाता है। चर्च में जाकर वो प्रेयर करता है। वो मस्जिद में जाकर नमाज पढ़ता है। ये मंदिर में जाकर पूजा करता है। लेकिन फिल्म का जो एंड होता है वो बड़ा गजब का। तीनों का बाप कन्हैया लाल निकलता है। अब चाहे ऐसा हर निठल्ला भड़काऊ बाबा किसी एक धर्म को किसी दूसरे धर्म का बाप समझे पर दिल्ली की चीफ मिनिस्टर तो मोदी जी को ही मां और मोदी जी को ही बाप समझती है। पीएम साहब की जो शख्सियत है ना वो कमाल है। जब उनके साथ बैठो तो कई बार ऐसा लगता है कि जैसे बहुत ही मजबूत पिता और दूसरे ही पल वो ऐसा लगता है कि जैसे कोई संवेदनशील मां हो क्या रहा है? हो क्या रहा है ये? चरण वंदना। चरण वंदना दिस इज़ चरण वंदना। अब रेखा जी की मोदी भक्ति तो इतनी संस्कारी है कि वह मोदी जी की चोरी में भी चाम ढूंढ लेती हैं। वो कहते हैं वोट चोरी। अरे वोट चोरी नहीं दिलों की चोरी करता है मोदी और हम सबका दिल उन्होंने चुराया हुआ है। चुराया है कि नहीं चुराया? तुम्हारा नहीं चुराया क्या भाई? हां तो फिर काहे नहीं हाथ खड़ा करते हो? तो जैसे माखन चोर थे ऐसे ही मनो के चोर हैं मोदी। और अब आपके दिलों के साथ-साथ आपकी सांस चुराने का भी लाजवाब काम कर रही है नरेंद्र और रेखा की ये दिल्ली वाली जोड़ी। दिस नॉर्मल पब्लिक हेल्थ इमरजेंसी गोपी दिल्ली टू समथिंग अबाउट दिस दिस योर सिटीजन सिटी स्लोली चेंज। देखिए भाई साहब देश बहुत संकट में है। हालत इतनी खराब है कि अब लोग विश्व गुरु की राजधानी को छोड़कर भागने लगे हैं। यह सोचकर कि चाहे वो दुनिया के किसी नॉन विश्व गुरु देश में भी चले जाएं पर खुद को और अपनी फैमिली को एक बेहतर जिंदगी दे पाएं। इसकी उम्र पता है कितनी है? इसकी ऐज है भाई 5 साल। और इस बच्चे को पता है क्या दिक्कत हुई है? इसको थ्रोट इनफेक्शन हो गया है। अब इस वजह से तीन दिन से हॉस्पिटल में एडमिट है और अब मैं दिल्ली में नहीं रहूंगा भाई। मैं छोड़ दूंगा। प्लीज थिंक ट्वाइस बिफोर मूविंग टू दिल्ली। दिस इज द कंडीशन ऑफ माय एयर प्यूरीिफायर। इतना सारा पोल्यूशन आपको बीमार बहुत बीमार कर सकता है। और मेरी मम्मी है, मम्मी को अस्थमा की दिक्कत है। तो अब हमने फैसला ले लिया है दिल्ली छोड़ने का। सारी चीजें हमारी दिल्ली में ही है। लेकिन स्टिल वी आर गोइंग टू लीव दिल्ली वैरी सून। दिस इज द टाइम टू लीव दिल्ली। सो, आई ऍम नाउ विलिंग टू गो इंटू डेट एंड मूव माई पेरेंट्स आउट ऑफ दिस गैस चेंबर बिकॉज़ यू आर रियली गोइंग टू स्ट्रगल इवन फॉर योर ब्रेथ्स। यू नो व्हाट आई एम सेइंग? आई नो व्हाट यू आर सेइंग कि दिल्ली वालों के पास अब दो ही ऑप्शंस बचे हैं। या तो दिल्ली छोड़ दें या फिर रेखा जी की बात मान के एक्यूआई को टेंपरेचर समझ के। आप भी मौसम का मजा लीजिए। और अगर मौत के मुंह में हाथ डालकर जिंदगी के मजे लेने आपको नहीं आते हैं तो कमेंट्स में मजा खराब करने वाले अंधभक्त बनने का टाइम आ गया है। पोलशन को लेके एक फालतू का पॉलिटिकल इशू बनाया जा रहा है। इसमें कोई पैनिकिक करने की सिचुएशन है ही नहीं। बिकॉज़ दिल्ली वाले बहुत टाइम से यही हवा सूंघ रहे हैं एंड उनको कुछ नहीं हो रहा। ऐसा दिल्ली वालों का कहना है मेरे कमेंट्स में आकर। भाई साहब मेरा दिमाग फट रहा है इस टाइम। दिल्ली दिल्ली की जनता खुश है। मुझे इतना मालूम है। मतलब मैंने एक्चुअल एक न्यूज़ पेपर की वो फोटो शेयर करी है जिसमें लिखा हुआ है कि भाई 15% ऑफ ऑल डेथ्स इन दिल्ली आर नाउ ड्यू टू एयर पोलशन स्टिल पीपल आर नॉट कन्वस्ड। आई एम सो शॉक्ड राइट नाउ कि हमारा पॉलिटिकल बायस एक हेल्थ क्राइसिस से भी ज्यादा बड़ा हो गया है। मतलब हमें लगता है कि अगर गलती से किसी ने रियल इशू उठाया तो हमारे लीडर पे बात ना आ जाए और उसको सिर्फ अपने लीडर को सही साबित करने के लिए हम लोग उस इशू को ही गलत बता देते हैं। क्योंकि अब इस देश में हर इशू एक षड्यंत्र है और हर प्रोटेस्ट एक साजिश। अब बच्चों को अरेस्ट करेंगे आप? बच्चों का प्रूफ किस में लेओगे? हां, बच्चे का बच्चे सांस भी नहीं लेते क्या? आपको पता है प्रोटेस्ट किसके लिए हो रहा है? सांस के लिए हो रहा है ना? यह सांस वांस सब एंटीन नेशनल प्रोपेगेंडा है। असली मुद्दा सिर्फ धर्म है। और असली देशभक्त वो सेल्फ प्रोक्लेमड धर्म गुरु जो आपको दिवाली पे पटाखे फोड़ने के लिए एनकरेज करेंगे। आई विल नॉट डिनाई टू द चिल्ड्रन ऑफ़ दिस डे दैट दे शुड नॉट बर्स्ट क्रैकर्स बिकॉज़ समबडी थिंक्स पोलशन। यू कांट टेक अवे एवरी एस्पेक्ट ऑफ़ कल्चर यूजिंग पोलशन। आई थिंक इट्स अ वेरी मोटिवेटेड पुश दैट सर्टन पीपल आर डूइंग व्हिच इज नॉट राइट। और फिर ऐसे नेशनलिस्ट बाबा पटाखों से हुए पोलुशन से आपको बचने का सबसे सस्ता और सीक्रेट नुस्खा भी बताएंगे। एयर प्यूरीिफायर से कुछ होता है? एयर प्यार तो अमीर लोगों का चौतला है। घर के में थोड़े पर्दे लगा लो। 15-20 दिन बाद मास्क लगा के थोड़ा झाड़ लो और भीतर बैठ के ऐसे सर करो। गंगा यमुना थोड़ी निकलने दो बाहर। तो अब असली गंगा और यमुना को प्रदूषण सहने दो और हिंदू राष्ट्र के कट्टरता भरे सपने को देश की प्रायोरिटी नंबर वन रहने दो क्योंकि हिंदू नहीं रहेगा तो दुनिया नहीं रहेगी और इसीलिए इस बढ़ते पोलशन से हिंदुओं की कम होती लाइफ एक्सपेक्टेंसी की प्रॉब्लम को सॉल्व करने के लिए बीजेपी आरएसएस इकोसिस्टम आपको एक से बढ़कर एक विश्वगुरु जीनियस आइडियाज देता रहेगा। संघ प्रमुख मोहन भागवत जी ने एक बहुत बड़ी बात कही। उन्होंने कहा कि सभी को तीन बच्चे पैदा करने चाहिए। नहीं चार। अच्छा चार करने चाहिए। हां। हो क्या रहा है? हो क्या रहा है ये? तो ये हो क्या रहा है मुझे भी नहीं पता। चच्चे के 30 बच्चे हो सकते हैं। तो हिंदुओं के चार क्यों नहीं हो सकते हैं? और क्या बुराई है? दो बच्चे घर के लिए, एक बच्चे संघ का के लिए और एक बच्चे हिंदू राष्ट्र का लिए। मैं बहुत सौभाग्यशाली हूं कि आपके चरण दिल्ली में पड़े और हम सब बहुत ही भाग्यशाली हैं कि हमारे कदम मोदी के न्यू इंडिया में पड़े हैं। जहां जनता को हराकर चुनाव जीतने का सुपरहिट फार्मूला देखने को मिलता है। और यह ब्रिटिश ब्रह्मास्त्र गारंटीड जीत के लिए एक ही मंत्र यूज़ करता है। और वो यह है कि जब तक भारत को बांटेंगे नहीं, भारत में ही लोगों को एक दूसरे से लड़ाएंगे नहीं। तब तक यहां राज करना मुश्किल है। इस वीडियो के सामने आने के बाद सवाल तो बनता ही है। अगर हम करें तो करें क्या? बोले तो बोले क्या? वाह मोदी जी वाह वाह वाह नहीं मैं ऐसा कुछ नहीं कहूंगा। मैं कहूंगा मोदी कहां है तेरा 56 इंच? कैसा है तू? तू रेिग्नेशन दे दे तू हट जा। ऐसा क्यों बोल रहे हो भाई? लेकिन टेंशन मत लीजिए। जब तक WhatsApp में गुड मॉर्निंग भेजने की सुविधा है तब तक आपको कुछ नहीं होगा। मैं गारंटी देता हूं। आप पे मीम्स नहीं बनते हैं। एक इल्जाम ये भी है। ओ ये इल्जाम है। हां। आपको कुछ ऐसा करना चाहिए। आईडिया मत दे देना। पर एक चीज तो है कि जहां तक YouTube का सवाल है। फोकस तो आप ही के ऊपर है और सवाल वहीं पे आपसे पूछे जा रहे हैं और पूछे जाने भी चाहिए। देखिए अच्छा है। लोगों को रोजगार मिलता रहना चाहिए। आप इतना तो एप्रिशिएट करेंगे अपनी मुख्यमंत्री को कि रोजगार दिए रखा है उनको कम नहीं किया। चलिए एटलीस्ट क्रिएटर्स इकॉनमी में आप कंट्रीब्यूट कर रही हैं। बहुत-बहुत शुक्रिया लेडीज एंड जेंटलमैन कैन वी हैव अ स्टैंडिंग ऑफ़ क्लॉज़ फॉर द चीफ मिनिस्टर ऑफ़ दिल्ली? ताली हल्की नहीं है। अभी भी हल्की लग रही है मेरे को। थोड़ा वजन डालो। और ये बहनें तो बजा ही नहीं रही। शॉल में हाथ डाल के बैठ गई हैं। इतनी थोड़ी ना ठंडी हो गई है। गुप्ता हाय हाय रेखा गुप्ता हाय हाय रेखा गुप्ता हाय हाय रेखा गुप्ता हाय हाए रेखा गुप्ता हाय हाय रे गुप्ता हाय हाए दिल्ली दिल्ली की जनता खुश है मुझे इतना मालूम ने"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Send template1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send template1": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "Google Sheets Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields7": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields6": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields8": {
+      "main": [
+        []
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields10": {
+      "main": [
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields9": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields11": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript7": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields12": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript8": {
+      "main": [
+        [
+          {
+            "node": "If6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If6": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript9",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript9": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2a75b7df-a3bf-4937-ad07-64be1c27ca8e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2880d0215b6f5224db4eab2eb9fb9cb321cfcbfcbf5eb271738a02a54af898b0"
+  },
+  "id": "ss6xXfG3dCeYtbLZ",
+  "tags": []
+}
