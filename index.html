@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>n8n Workflow Portfolio | Automation Expert</title>
+  <title>n8n Workflow Portfolio | Goutam Aswani</title>
   <meta name="description" content="Professional n8n workflow portfolio showcasing automation solutions that save time, reduce errors, and scale effortlessly.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +20,7 @@
         <div class="logo">⚡ n8n Portfolio</div>
         <nav class="nav-links">
           <a href="#workflows">Workflows</a>
-          <a href="#stats">Stats</a>
+          <a href="#details">Details</a>
           <a href="https://github.com/Goutam-aswani/N8N-workflows" target="_blank">GitHub</a>
         </nav>
       </div>
@@ -63,7 +63,7 @@
     </div>
   </section>
 
-  <!-- Workflows Section -->
+  <!-- Workflows Overview Section -->
   <section class="workflows" id="workflows">
     <div class="container">
       <div class="section-header">
@@ -94,6 +94,7 @@
           <div class="tech-stack">
             <span class="tech-tag">n8n</span>
             <span class="tech-tag">Gemini AI</span>
+            <span class="tech-tag">Groq</span>
             <span class="tech-tag">Google Sheets</span>
           </div>
         </div>
@@ -102,7 +103,7 @@
         <div class="workflow-card">
           <div class="workflow-icon">📝</div>
           <h3>LinkedIn Content Automation</h3>
-          <p class="description">Transform YouTube videos into LinkedIn posts automatically. One video = one post with zero extra effort.</p>
+          <p class="description">Transform YouTube videos into engaging LinkedIn posts. AI relevance filtering + WhatsApp approval flow.</p>
           <div class="workflow-stats">
             <div class="workflow-stat">
               <span class="workflow-stat-value">45 min</span>
@@ -125,6 +126,152 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Detailed Workflow Sections -->
+  <section class="workflow-details" id="details">
+    <div class="container">
+      <div class="section-header">
+        <h2>How They Work</h2>
+        <p>Detailed breakdown of each automation</p>
+      </div>
+
+      <!-- SMS Expense Tracker Detail -->
+      <div class="workflow-detail">
+        <div class="workflow-detail-header">
+          <div class="workflow-icon" style="background: rgba(16, 185, 129, 0.15);">💰</div>
+          <h3>SMS Expense Tracker</h3>
+        </div>
+        
+        <div class="workflow-detail-content">
+          <div class="workflow-info">
+            <h4>The Problem</h4>
+            <p>Manual expense tracking is tedious and error-prone. Most people don't log transactions consistently, leading to incomplete financial records and hours wasted on monthly reconciliation.</p>
+            
+            <h4>The Solution</h4>
+            <ul class="feature-list">
+              <li>Webhook receives SMS from bank notifications in real-time</li>
+              <li>Gemini AI parses transaction details (amount, merchant, type)</li>
+              <li>Groq serves as fallback for reliability</li>
+              <li>Auto-categorizes as CREDIT or DEBIT</li>
+              <li>Logs to Google Sheets with zero manual input</li>
+            </ul>
+
+            <div class="workflow-flow">
+              <div class="workflow-flow-title">Workflow Flow</div>
+              <div class="flow-steps">
+                <span class="flow-step">📩 SMS</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">🔗 Webhook</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">🧠 AI Parse</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">🔀 Route</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">📊 Sheets</span>
+              </div>
+            </div>
+
+            <div class="impact-grid">
+              <div class="impact-item">
+                <div class="impact-value">30 hrs</div>
+                <div class="impact-label">Saved / Year</div>
+              </div>
+              <div class="impact-item">
+                <div class="impact-value">98%</div>
+                <div class="impact-label">Accuracy</div>
+              </div>
+              <div class="impact-item">
+                <div class="impact-value">15 min</div>
+                <div class="impact-label">Setup Time</div>
+              </div>
+            </div>
+
+            <div class="workflow-cta">
+              <a href="https://github.com/Goutam-aswani/N8N-workflows/tree/main/workflows/1-sms-expense-tracker" class="btn btn-primary btn-small" target="_blank">View on GitHub</a>
+            </div>
+          </div>
+
+          <div class="workflow-screenshot">
+            <div class="screenshot-placeholder">
+              <span class="icon">🔄</span>
+              <p>n8n Workflow Canvas</p>
+            </div>
+            <div class="screenshot-caption">SMS → AI Parsing → Google Sheets automation flow</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LinkedIn Automation Detail -->
+      <div class="workflow-detail">
+        <div class="workflow-detail-header">
+          <div class="workflow-icon" style="background: rgba(102, 126, 234, 0.15);">📝</div>
+          <h3>LinkedIn Content Automation</h3>
+        </div>
+        
+        <div class="workflow-detail-content">
+          <div class="workflow-info">
+            <h4>The Problem</h4>
+            <p>Creating consistent LinkedIn content is time-consuming. Watching videos, extracting insights, formatting posts, and publishing takes 45+ minutes per post — leading to inconsistent posting and missed opportunities.</p>
+            
+            <h4>The Solution</h4>
+            <ul class="feature-list">
+              <li>Tracks YouTube videos you watch via webhook</li>
+              <li>Extracts transcripts automatically</li>
+              <li>AI filters for relevance to your niche (AI/ML/Tech)</li>
+              <li>Smart chunking for long videos</li>
+              <li>Generates engaging posts with casual, storytelling tone</li>
+              <li>WhatsApp approval before auto-posting to LinkedIn</li>
+            </ul>
+
+            <div class="workflow-flow">
+              <div class="workflow-flow-title">Workflow Flow</div>
+              <div class="flow-steps">
+                <span class="flow-step">🎬 YouTube</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">📝 Transcript</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">🎯 Filter</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">✍️ AI Post</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">📱 Approve</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">💼 LinkedIn</span>
+              </div>
+            </div>
+
+            <div class="impact-grid">
+              <div class="impact-item">
+                <div class="impact-value">45 min</div>
+                <div class="impact-label">Saved / Post</div>
+              </div>
+              <div class="impact-item">
+                <div class="impact-value">1/day</div>
+                <div class="impact-label">Post Output</div>
+              </div>
+              <div class="impact-item">
+                <div class="impact-value">20 min</div>
+                <div class="impact-label">Setup Time</div>
+              </div>
+            </div>
+
+            <div class="workflow-cta">
+              <a href="https://github.com/Goutam-aswani/N8N-workflows/tree/main/workflows/2-linkedin-automation" class="btn btn-primary btn-small" target="_blank">View on GitHub</a>
+            </div>
+          </div>
+
+          <div class="workflow-screenshot">
+            <div class="screenshot-placeholder">
+              <span class="icon">🔄</span>
+              <p>n8n Workflow Canvas</p>
+            </div>
+            <div class="screenshot-caption">YouTube → AI Analysis → LinkedIn publishing pipeline</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
