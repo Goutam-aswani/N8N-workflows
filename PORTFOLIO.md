@@ -8,9 +8,9 @@
 
 | Metric | Value |
 |--------|-------|
-| 🤖 Workflows Built | 2 |
-| ⏱️ Total Time Saved | 75+ hours/year |
-| 🔌 APIs Integrated | 8+ |
+| 🤖 Workflows Built | 3 |
+| ⏱️ Total Time Saved | 165+ hours/year |
+| 🔌 APIs Integrated | 10+ |
 | 🧠 AI Models Used | Gemini, Groq, Llama, DeepSeek |
 
 ---
@@ -53,6 +53,27 @@
 - Smart chunking for long videos
 - WhatsApp approval before posting
 - Direct LinkedIn publishing
+
+---
+
+### [3. LinkedIn Job Post Outreach](./workflows/3-Linkedin-posts-outreach/)
+**Scrape LinkedIn posts for hidden jobs → AI-generated personalized outreach**
+
+| Impact | Value |
+|--------|-------|
+| ⏱️ Time Saved | 90+ hours/month |
+| 🎯 Leads | 10-15/day |
+| ✅ Setup | 25 minutes |
+
+**Tech:** n8n • Groq (Llama 3.3) • OpenRouter • Google Sheets • WhatsApp
+
+**Features:**
+- Schedule-based LinkedIn post scraping (every 6h)
+- AI classification (HIRING vs NOT HIRING)
+- Contact extraction from posts
+- Personalized message generation with AI
+- WhatsApp approval workflow
+- Auto-tracking in Google Sheets
 
 ---
 

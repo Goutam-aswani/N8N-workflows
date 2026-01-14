@@ -1,0 +1,1895 @@
+{
+  "name": "linkedin posts scraping",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7fea02ef-e1f2-499b-b3e8-9faaa374ad07",
+              "name": "Poster Name",
+              "value": "={{ $json['Poster Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "b797020e-bec5-491e-84ea-d14db156e7ea",
+              "name": "Poster Profile",
+              "value": "={{ $json['Poster Profile'] }}",
+              "type": "string"
+            },
+            {
+              "id": "12681af4-62fe-49d2-8c00-8b2ac1cb0983",
+              "name": "Post Content",
+              "value": "={{ $json['Post Content'] }}",
+              "type": "string"
+            },
+            {
+              "id": "f14e7d48-5892-4341-a77a-14262d7c82dc",
+              "name": "emails",
+              "value": "={{ $json.emails }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        -512
+      ],
+      "id": "249c1913-2193-44fd-b195-7ebcddc6b5b7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a personalized outreach message for this hiring manager:\n\nJob Details:\n- Hiring Manager:{{ $json['Poster Name'] }}\n- Position: Extract from post content\n- Key Requirements: Extract main skills needed\n- Job Post Content: {{ $json['Post Content'] }}\n\nMy Background:\n- I'm a workflow automation specialist\n- Built 5 production-grade n8n automation workflows\n- Experience with: API integrations, data pipelines, AI-powered automations\n- Portfolio: https://goutam-aswani.github.io/N8N-workflows/\n- Strong in Python,ML,DL,GENAI, process optimization, multi-service integrations\n\n\nTask:\n1. Extract the job title from the post\n2. Identify 2-3 key requirements they mention\n3. Create a SHORT message (2-3 sentences) that:\n   - Mentions their specific role\n   - Shows you understand what they need\n   - Connects your experience to their needs\n   - Includes portfolio link naturally\n   - Ends with a clear next step\n\nOutput ONLY valid JSON (no markdown, no extra text)",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are an expert recruiter outreach specialist. Your task is to create personalized, \ncompelling messages to hiring managers based on their job postings.\n\nCRITICAL RULES:\n1. Keep message SHORT and PUNCHY (max 150 words)\n2. NO generic templates - PERSONALIZE based on job post content\n3. Always mention the job title they're hiring for\n4. Highlight relevant skills from my portfolio that match THEIR needs\n5. Include portfolio link naturally (not forced)\n6. Be confident but professional\n7. Create URGENCY without being pushy\n8. End with a CLEAR CALL TO ACTION\n9. Format as JSON with \"subject\", \"message\", and \"tone\"\n\nPERSONALITY RULES:\n- Sound like a real person, not AI\n- Use casual but professional tone\n- Show you actually READ their post (reference specific details)\n- Be helpful first, sales-y second\n\nOUTPUT FORMAT (STRICT JSON):\n{\n  \"subject\": \"Quick message about [ROLE]\",\n  \"message\": \"The actual message to send\",\n  \"tone\": \"professional\" or \"casual\"\n}\n\nKEY INSTRUCTIONS:\n- For Python/n8n roles: Emphasize workflow automation and API integration experience\n- For automation roles: Talk about process optimization and time savings\n- For any role: Reference the portfolio link as \"my workflow portfolio\"\n- Always extract the job title and mention it in the message"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1024,
+        -512
+      ],
+      "id": "1f05278a-93f7-4132-9821-112b6db9a4f3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -304
+      ],
+      "id": "46d1a325-6cce-4eea-91a1-a855382bf94f",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Old70oQmxLC3kMfT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1-0528:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        976,
+        -208
+      ],
+      "id": "68dcbb8c-2cf5-4b71-aa64-fa9e4b9d267f",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "zUAvvt1betWjDTIo",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7cf5fb8a-3262-47b1-bae4-53f17a70940a",
+              "name": "subject",
+              "value": "={{ JSON.parse($json.output).subject }}",
+              "type": "string"
+            },
+            {
+              "id": "76eb9ccd-9e9b-4c01-afb4-67322da7cfb2",
+              "name": "message",
+              "value": "={{ JSON.parse($json.output).message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        -512
+      ],
+      "id": "7ebde4ff-a985-4252-8d10-29a28d5a3da7",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "920673921128974",
+        "recipientPhoneNumber": "+917649010424",
+        "textBody": "=poster profile : {{ $('Edit Fields').item.json[\"Poster Profile\"] }}\n\nmessage to send : {{ $('Edit Fields1').item.json.subject }}\n{{ $('Edit Fields1').item.json.message }}\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1824,
+        -512
+      ],
+      "id": "dd80da10-a142-49bc-9059-37d7dc6fc66f",
+      "name": "Send message",
+      "webhookId": "10c61877-21f9-45a8-aec1-ac6cb55bf950",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "wJuW3EF27ZETofxX",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -272,
+        -512
+      ],
+      "id": "05a7fa41-bb30-46d7-8e1a-9ad32518bcce",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a05200c7-7200-4d79-b630-d98baaad4820",
+              "leftValue": "={{ $json['Poster Profile'] }}",
+              "rightValue": "linkedin.com",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ae6fdba9-ed15-4424-961b-3d1497a4d77a",
+              "leftValue": "={{ $json.processed }}",
+              "rightValue": "no",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -384,
+        288
+      ],
+      "id": "3d342872-6059-4a76-a1ba-e69a107d52f5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -176,
+        192
+      ],
+      "id": "2b2c456c-519e-481c-a034-47719d61eade",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bf97120d-a7b6-4fb1-b560-314ba46394d5",
+              "name": "Poster Name",
+              "value": "={{ $json['Poster Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "51a8a9fa-10dc-4d57-bfc3-6f26d439c05b",
+              "name": "Poster Profile",
+              "value": "={{ $json['Poster Profile'] }}",
+              "type": "string"
+            },
+            {
+              "id": "62c3e09e-cc45-4955-9b2d-8f3aa91f2ef3",
+              "name": "Post Content",
+              "value": "={{ $json['Post Content'] }}",
+              "type": "string"
+            },
+            {
+              "id": "51f8732d-1f47-4f1e-a06b-27011064f81b",
+              "name": "emails",
+              "value": "={{ $json.emails }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        208
+      ],
+      "id": "f133e936-f354-452b-9b41-045533618911",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2ed53bd4-e2e1-4ad0-aff6-5cf49c076080",
+              "leftValue": "={{ $json.emails }}",
+              "rightValue": "@",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        336,
+        208
+      ],
+      "id": "7a56f803-3ced-4c8e-9c37-a5a6cc9d1955",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Post content: {{ $json['Post Content'] }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "# LinkedIn Post Hiring Classification Prompt\n\nYou are a precise hiring content classifier. Your task is to determine whether a LinkedIn post is **directly related to hiring/recruitment** or not.\n\n## Classification Criteria\n\n### Label as \"HIRING\" if the post:\n- Contains explicit job openings or recruitment announcements\n- Actively solicits applications or resumes\n- Includes contact information (email/form) specifically for job applications\n- Mentions \"we're hiring,\" \"looking for,\" \"join our team,\" \"open position,\" etc.\n- Lists specific job requirements, qualifications, or role descriptions\n- Indicates application instructions or how to apply\n\n### Label as \"NOT HIRING\" if the post:\n- Discusses skills, certifications, or course completions (personal achievements)\n- Shares automation workflows, tools, or technical solutions without recruiting\n- Offers services, consulting, or business solutions\n- Provides thought leadership, tips, or industry insights\n- Mentions AI/automation capabilities without actively recruiting\n- Describes company culture, values, or general team updates without open positions\n\n## Output Format\n\nRespond with a JSON object:\n{\n  \"classification\": \"HIRING\" or \"NOT HIRING\",\n  \"confidence\": \"high\" | \"medium\" | \"low\",\n  \"reasoning\": \"Brief explanation of why this classification was chosen\",\n  \"key_indicators\": [\"list\", \"of\", \"specific\", \"phrases\", \"or\", \"signals\"]\n}\nDO NOT include:\n\njson or  markers\nAny text before or after the JSON\nAny markdown formatting\nAny explanatory text\n\n## Important Notes\n- Focus on **explicit hiring intent**, not just mentions of teams or work\n- Service offerings and thought leadership are NOT hiring posts\n- Personal achievements and certifications are NOT hiring posts\n- Only classify as HIRING if there's a clear call-to-action for job applications\n\n\nNow classify the following post:\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        544,
+        304
+      ],
+      "id": "7d38ce07-889b-4797-aa79-2531d93bde8f",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        400,
+        512
+      ],
+      "id": "f8b0d140-17e1-4329-b0da-e19eb1ca8d6d",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "Old70oQmxLC3kMfT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-3.3-70b-instruct:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        496,
+        528
+      ],
+      "id": "078f9a3a-4270-4ca4-a5b6-bb7ee88ff054",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "zUAvvt1betWjDTIo",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Post content: {{ $json['Post Content'] }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "# LinkedIn Post Hiring Classification Prompt\n\nYou are a precise hiring content classifier. Your task is to determine whether a LinkedIn post is **directly related to hiring/recruitment** or not.\n\n## Classification Criteria\n\n### Label as \"HIRING\" if the post:\n- Contains explicit job openings or recruitment announcements\n- Actively solicits applications or resumes\n- Includes contact information (email/form) specifically for job applications\n- Mentions \"we're hiring,\" \"looking for,\" \"join our team,\" \"open position,\" etc.\n- Lists specific job requirements, qualifications, or role descriptions\n- Indicates application instructions or how to apply\n\n### Label as \"NOT HIRING\" if the post:\n- Discusses skills, certifications, or course completions (personal achievements)\n- Shares automation workflows, tools, or technical solutions without recruiting\n- Offers services, consulting, or business solutions\n- Provides thought leadership, tips, or industry insights\n- Mentions AI/automation capabilities without actively recruiting\n- Describes company culture, values, or general team updates without open positions\n\n## Output Format\n\nRespond with a JSON object:\n{\n  \"classification\": \"HIRING\" or \"NOT HIRING\",\n  \"confidence\": \"high\" | \"medium\" | \"low\",\n  \"reasoning\": \"Brief explanation of why this classification was chosen\",\n  \"key_indicators\": [\"list\", \"of\", \"specific\", \"phrases\", \"or\", \"signals\"]\n}\nDO NOT include:\n\njson or  markers\nAny text before or after the JSON\nAny markdown formatting\nAny explanatory text\n\n## Important Notes\n- Focus on **explicit hiring intent**, not just mentions of teams or work\n- Service offerings and thought leadership are NOT hiring posts\n- Personal achievements and certifications are NOT hiring posts\n- Only classify as HIRING if there's a clear call-to-action for job applications\n\n\nNow classify the following post:\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1088,
+        -96
+      ],
+      "id": "134709f9-4b9e-425a-a572-c60150f2061e",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        944,
+        112
+      ],
+      "id": "62026ffa-9455-4054-9d7e-d23840bfd1e6",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "Old70oQmxLC3kMfT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1f244a0-61a3-44d8-9679-3deef88d8432",
+              "name": "classification",
+              "value": "={{ JSON.parse($json.output).classification }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1536,
+        -96
+      ],
+      "id": "f5cfe9b3-bccd-447d-aba2-698f7e40edde",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "37d13280-bbe0-4768-baeb-564e5952d1d1",
+              "leftValue": "={{ $json.classification }}",
+              "rightValue": "HIRING",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1792,
+        -96
+      ],
+      "id": "b89b8dd7-38f4-4e0b-b2b7-c535835de6b9",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8",
+          "mode": "list",
+          "cachedResultName": "LinkedIn n8n Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 109130342,
+          "mode": "list",
+          "cachedResultName": "relevant posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit#gid=109130342"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Poster Name": "={{ $('If1').item.json['Poster Name'] }}",
+            "Poster Profile": "={{ $('If1').item.json['Poster Profile'] }}",
+            "Post Content": "={{ $('If1').item.json['Post Content'] }}",
+            "emails": "={{ $('If1').item.json.emails }}",
+            "msg sent": "no"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Poster Name",
+              "displayName": "Poster Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Poster Profile",
+              "displayName": "Poster Profile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Post Content",
+              "displayName": "Post Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "emails",
+              "displayName": "emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "msg sent",
+              "displayName": "msg sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2896,
+        -192
+      ],
+      "id": "7ed235bb-b6ac-4591-8da9-3e141ebdbfb9",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1f244a0-61a3-44d8-9679-3deef88d8432",
+              "name": "classification",
+              "value": "={{ JSON.parse($json.output).classification }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        304
+      ],
+      "id": "0cb70b96-6f88-4c30-aae0-95e6dccc7a69",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "37d13280-bbe0-4768-baeb-564e5952d1d1",
+              "leftValue": "={{ $json.classification }}",
+              "rightValue": "HIRING",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1072,
+        304
+      ],
+      "id": "0febbbc9-44b6-46df-ae44-efbd9552dd37",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8",
+          "mode": "list",
+          "cachedResultName": "LinkedIn n8n Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 109130342,
+          "mode": "list",
+          "cachedResultName": "relevant posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit#gid=109130342"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Poster Name": "={{ $('If1').item.json['Poster Name'] }}",
+            "Poster Profile": "={{ $('If1').item.json['Poster Profile'] }}",
+            "Post Content": "={{ $('If1').item.json['Post Content'] }}",
+            "emails": "={{ $('If1').item.json.emails }}",
+            "msg sent": "no"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Poster Name",
+              "displayName": "Poster Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Poster Profile",
+              "displayName": "Poster Profile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Post Content",
+              "displayName": "Post Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "emails",
+              "displayName": "emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "msg sent",
+              "displayName": "msg sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2480,
+        288
+      ],
+      "id": "ed3b8074-aa6b-4dd3-ba90-8150d1291770",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8",
+          "mode": "list",
+          "cachedResultName": "LinkedIn n8n Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "posts extracted",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        288
+      ],
+      "id": "9296f047-785e-4151-92ab-1a6825bf3b4c",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "1Nq0Rs5BAr3rYDc3",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8",
+          "mode": "list",
+          "cachedResultName": "LinkedIn n8n Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 109130342,
+          "mode": "list",
+          "cachedResultName": "relevant posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit#gid=109130342"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -64,
+        -512
+      ],
+      "id": "f747de5a-e0a1-4ed9-bd3d-25a856faaa14",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2933ea69-d751-45b1-b2a6-9e05e88ce962",
+              "leftValue": "={{ $json['msg sent'] }}",
+              "rightValue": "no",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        96,
+        -512
+      ],
+      "id": "bef1b5d7-487e-4059-9f04-e90387afc3ce",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        544,
+        -528
+      ],
+      "id": "7ee22425-ee5f-432d-87c4-9cf9cb890d2a",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "chatId": "1483876866",
+        "text": "= {{ $('Edit Fields').item.json[\"Poster Profile\"] }}\n\n{{ $json.subject }}\n{{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1584,
+        -512
+      ],
+      "id": "737a1cb0-28c0-4e07-85f1-c699b4d6bc69",
+      "name": "Send a text message",
+      "webhookId": "da50f48e-51e3-4974-b7ec-761a5a6a645c",
+      "credentials": {
+        "telegramApi": {
+          "id": "Uf6brTlX2m594tg1",
+          "name": "job_search-bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2240,
+        -512
+      ],
+      "id": "c4a2a92c-62f5-4799-b224-27e2c1924091",
+      "name": "Wait",
+      "webhookId": "64f79a2f-e5a4-4ff1-8f6d-aba1d2a137ae"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8",
+          "mode": "list",
+          "cachedResultName": "LinkedIn n8n Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 109130342,
+          "mode": "list",
+          "cachedResultName": "relevant posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit#gid=109130342"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Post Content": "={{ $('Edit Fields').item.json[\"Post Content\"] }}",
+            "msg sent": "yes"
+          },
+          "matchingColumns": [
+            "Post Content"
+          ],
+          "schema": [
+            {
+              "id": "Poster Name",
+              "displayName": "Poster Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Poster Profile",
+              "displayName": "Poster Profile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Post Content",
+              "displayName": "Post Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "emails",
+              "displayName": "emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "msg sent",
+              "displayName": "msg sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2032,
+        -512
+      ],
+      "id": "48025e37-711c-4034-b93a-0ab0ece2c018",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1280,
+        208
+      ],
+      "id": "c8a72f2f-fe38-40cc-afbb-0f21a50156cc",
+      "name": "Wait1",
+      "webhookId": "95cf68f8-e960-4fde-85ff-265241ddd0cd"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2384,
+        -192
+      ],
+      "id": "3a609f7c-b3da-47d0-ac46-2b2b8df85f97",
+      "name": "Wait2",
+      "webhookId": "1f0f912d-5b1a-442f-92fe-eb343338aaf4"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8",
+          "mode": "list",
+          "cachedResultName": "LinkedIn n8n Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "posts extracted",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Post Content": "={{ $('Loop Over Items').item.json['Post Content'] }}",
+            "processed": "yes"
+          },
+          "matchingColumns": [
+            "Post Content"
+          ],
+          "schema": [
+            {
+              "id": "Post URL",
+              "displayName": "Post URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Poster Name",
+              "displayName": "Poster Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Poster Profile",
+              "displayName": "Poster Profile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Post Content",
+              "displayName": "Post Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date Posted",
+              "displayName": "Date Posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date Scraped",
+              "displayName": "Date Scraped",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "emails",
+              "displayName": "emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1488,
+        208
+      ],
+      "id": "b1612942-921e-42e8-8a4e-44e9b7ce798a",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1696,
+        208
+      ],
+      "id": "c3c3bba3-593d-47da-b609-6ecbcbc511db",
+      "name": "Wait3",
+      "webhookId": "d7e5e587-b5fd-4a43-9373-2435f26afea0"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8",
+          "mode": "list",
+          "cachedResultName": "LinkedIn n8n Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "posts extracted",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Post Content": "={{ $('Loop Over Items').item.json['Post Content'] }}",
+            "processed": "yes"
+          },
+          "matchingColumns": [
+            "Post Content"
+          ],
+          "schema": [
+            {
+              "id": "Post URL",
+              "displayName": "Post URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Poster Name",
+              "displayName": "Poster Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Poster Profile",
+              "displayName": "Poster Profile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Post Content",
+              "displayName": "Post Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date Posted",
+              "displayName": "Date Posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date Scraped",
+              "displayName": "Date Scraped",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "emails",
+              "displayName": "emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2544,
+        -192
+      ],
+      "id": "0e66440a-57f7-4739-9274-0e575f0a70c6",
+      "name": "Update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2720,
+        -192
+      ],
+      "id": "ebb9081b-57e8-4335-96fe-02051a955375",
+      "name": "Wait4",
+      "webhookId": "ae8c8f23-a0b0-44a2-a284-310249acec4e"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8",
+          "mode": "list",
+          "cachedResultName": "LinkedIn n8n Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 465788081,
+          "mode": "list",
+          "cachedResultName": "posts with emails",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DEXv7Cow_eMC3c8GzU2XB8xlddAZrFPiPcLXhsOH7r8/edit#gid=465788081"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Poster Name": "={{ $('If1').item.json['Poster Name'] }}",
+            "Poster Profile": "={{ $('If1').item.json['Poster Profile'] }}",
+            "Post Content": "={{ $('If1').item.json['Post Content'] }}",
+            "emails": "={{ $('If1').item.json.emails }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Poster Name",
+              "displayName": "Poster Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Poster Profile",
+              "displayName": "Poster Profile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post Content",
+              "displayName": "Post Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emails",
+              "displayName": "emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2176,
+        -192
+      ],
+      "id": "84bf645c-b32a-43a0-a9e1-02ce67fea5f2",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ndRUQrzXndKKL8O8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "meta-llama/Llama-3.1-8B-Instruct",
+          "mode": "list",
+          "cachedResultName": "meta-llama/Llama-3.1-8B-Instruct"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1040,
+        208
+      ],
+      "id": "904de9cc-9763-4cb6-a82b-9d731a2dc192",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "26xWx2cNvBDD8OzS",
+          "name": "OpenAi HF account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        320,
+        -528
+      ],
+      "id": "4cfb32c6-5acd-4d0e-9022-e1f1a6ad6915",
+      "name": "Limit"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner",
+    "timeSavedPerExecution": 10,
+    "errorWorkflow": "VSx54cmMrCcFB8PL"
+  },
+  "versionId": "fa17f537-1c02-462e-b765-cabd081b8d75",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2880d0215b6f5224db4eab2eb9fb9cb321cfcbfcbf5eb271738a02a54af898b0"
+  },
+  "id": "QE5KPwSxPw8s8gUX",
+  "tags": []
+}

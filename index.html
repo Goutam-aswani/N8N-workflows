@@ -44,11 +44,11 @@
     <div class="container">
       <div class="stats-grid">
         <div class="stat-item">
-          <div class="stat-value">75+</div>
+          <div class="stat-value">165+</div>
           <div class="stat-label">Hours Saved / Year</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value">8+</div>
+          <div class="stat-value">10+</div>
           <div class="stat-label">APIs Integrated</div>
         </div>
         <div class="stat-item">
@@ -123,6 +123,33 @@
             <span class="tech-tag">YouTube API</span>
             <span class="tech-tag">Gemini AI</span>
             <span class="tech-tag">LinkedIn</span>
+          </div>
+        </div>
+
+        <!-- Workflow 3: LinkedIn Job Post Outreach -->
+        <div class="workflow-card">
+          <div class="workflow-icon">💼</div>
+          <h3>LinkedIn Job Post Outreach</h3>
+          <p class="description">Find hidden job opportunities by scraping LinkedIn posts. AI filters hiring posts and generates personalized outreach messages.</p>
+          <div class="workflow-stats">
+            <div class="workflow-stat">
+              <span class="workflow-stat-value">90+ hrs</span>
+              <span class="workflow-stat-label">Saved / Month</span>
+            </div>
+            <div class="workflow-stat">
+              <span class="workflow-stat-value">10-15</span>
+              <span class="workflow-stat-label">Leads / Day</span>
+            </div>
+            <div class="workflow-stat">
+              <span class="workflow-stat-value">25 min</span>
+              <span class="workflow-stat-label">Setup</span>
+            </div>
+          </div>
+          <div class="tech-stack">
+            <span class="tech-tag">n8n</span>
+            <span class="tech-tag">Groq</span>
+            <span class="tech-tag">OpenRouter</span>
+            <span class="tech-tag">Google Sheets</span>
           </div>
         </div>
       </div>
@@ -262,6 +289,72 @@
           <div class="workflow-screenshot">
             <img src="workflows/2-linkedin-automation/screenshots/workflow.png" alt="LinkedIn Content Automation">
             <div class="screenshot-caption">YouTube → AI Analysis → LinkedIn publishing pipeline</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LinkedIn Job Post Outreach Detail -->
+      <div class="workflow-detail">
+        <div class="workflow-detail-header">
+          <div class="workflow-icon" style="background: rgba(249, 115, 22, 0.15);">💼</div>
+          <h3>LinkedIn Job Post Outreach</h3>
+        </div>
+        
+        <div class="workflow-detail-content">
+          <div class="workflow-info">
+            <h4>The Problem</h4>
+            <p>Traditional LinkedIn job boards are oversaturated with outdated listings. Many companies announce hiring through personal posts first, but manually tracking and responding to these takes hours daily.</p>
+            
+            <h4>The Solution</h4>
+            <ul class="feature-list">
+              <li>Automatically scrapes LinkedIn posts every 6 hours based on search terms</li>
+              <li>AI classification filters real hiring posts from noise (85% accuracy)</li>
+              <li>Extracts contact information (emails, profiles) automatically</li>
+              <li>Generates personalized outreach messages with AI</li>
+              <li>WhatsApp approval workflow before sending</li>
+              <li>Tracks all posts and processed status in Google Sheets</li>
+            </ul>
+
+            <div class="workflow-flow">
+              <div class="workflow-flow-title">Workflow Flow</div>
+              <div class="flow-steps">
+                <span class="flow-step">⏰ Schedule</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">🔍 Scrape</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">🧠 AI Filter</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">✍️ Generate</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">📱 Approve</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">📊 Track</span>
+              </div>
+            </div>
+
+            <div class="impact-grid">
+              <div class="impact-item">
+                <div class="impact-value">90+ hrs</div>
+                <div class="impact-label">Saved / Month</div>
+              </div>
+              <div class="impact-item">
+                <div class="impact-value">10-15</div>
+                <div class="impact-label">Leads / Day</div>
+              </div>
+              <div class="impact-item">
+                <div class="impact-value">25 min</div>
+                <div class="impact-label">Setup Time</div>
+              </div>
+            </div>
+
+            <div class="workflow-cta">
+              <a href="https://github.com/Goutam-aswani/N8N-workflows/tree/main/workflows/3-Linkedin-posts-outreach" class="btn btn-primary btn-small" target="_blank">View on GitHub</a>
+            </div>
+          </div>
+
+          <div class="workflow-screenshot">
+            <img src="workflows/3-Linkedin-posts-outreach/screenshots/workflow.png" alt="LinkedIn Job Post Outreach">
+            <div class="screenshot-caption">LinkedIn scraping → AI classification → personalized outreach flow</div>
           </div>
         </div>
       </div>

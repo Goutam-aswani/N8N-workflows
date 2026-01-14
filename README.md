@@ -60,13 +60,35 @@ This repository showcases my n8n automation projects — real solutions to real 
 
 ---
 
+### 3. [LinkedIn Job Post Outreach](./workflows/3-Linkedin-posts-outreach/)
+
+**Discover hidden job opportunities by scraping LinkedIn posts and auto-generating personalized outreach**
+
+| Impact | Value |
+|--------|-------|
+| ⏱️ Time Saved | 90+ hours/month |
+| 🎯 Accuracy | 85% AI filtering |
+| ✅ Setup | 25 minutes |
+
+**How it works:**
+- 🔍 Scrapes LinkedIn posts for job-related content every 6 hours
+- 🧠 AI classification filters actual hiring posts from noise
+- ✍️ Generates personalized outreach messages with AI
+- 📧 Extracts contact information automatically
+- 📱 WhatsApp approval before sending
+- 📊 Tracks all posts and status in Google Sheets
+
+**Tech:** `n8n` `Groq (Llama 3.3)` `OpenRouter` `Google Sheets` `WhatsApp`
+
+---
+
 ## 📊 Portfolio Stats
 
 | Metric | Value |
 |--------|-------|
-| 🤖 Workflows | 2 |
-| ⏱️ Time Saved | 75+ hours/year |
-| 🔌 APIs Integrated | 8+ |
+| 🤖 Workflows | 3 |
+| ⏱️ Time Saved | 165+ hours/year |
+| 🔌 APIs Integrated | 10+ |
 | 🧠 AI Models | Gemini, Groq, Llama, DeepSeek |
 
 ---
