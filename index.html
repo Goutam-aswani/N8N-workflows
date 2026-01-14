@@ -3,411 +3,935 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>n8n Workflow Portfolio | Goutam Aswani</title>
-  <meta name="description" content="Professional n8n workflow portfolio showcasing automation solutions that save time, reduce errors, and scale effortlessly.">
+  <title>Goutam Aswani — I automate things that shouldn't be done by hand</title>
+  <meta name="description" content="n8n automation specialist. I build workflows that save hundreds of hours.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #faf9f7;
+      --bg-alt: #f0eeeb;
+      --text: #1a1a1a;
+      --text-secondary: #5a5a5a;
+      --text-muted: #8a8a8a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --green: #059669;
+      --orange: #d97706;
+      --border: #e5e5e5;
+      --code-bg: #1a1a1a;
+      --code-text: #e5e5e5;
+      --serif: 'Instrument Serif', Georgia, serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f0f0f;
+      --bg-alt: #1a1a1a;
+      --text: #f5f5f5;
+      --text-secondary: #a0a0a0;
+      --text-muted: #6a6a6a;
+      --accent: #60a5fa;
+      --accent-hover: #93c5fd;
+      --green: #34d399;
+      --orange: #fbbf24;
+      --border: #2a2a2a;
+      --code-bg: #0a0a0a;
+      --code-text: #e5e5e5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection {
+      background: var(--accent);
+      color: white;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+      transition: opacity 0.2s;
+    }
+
+    a:hover {
+      opacity: 0.7;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Nav - Simple, out of the way */
+    nav {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-name {
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+
+    .nav-name:hover {
+      opacity: 1;
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      font-size: 0.9rem;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      opacity: 1;
+    }
+
+    /* Hero - Personal, not corporate */
+    .hero {
+      padding: 100px 0 80px;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      font-family: var(--mono);
+    }
+
+    .hero-title {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 400;
+      line-height: 1.15;
+      max-width: 800px;
+      margin-bottom: 32px;
+    }
+
+    .hero-title em {
+      font-style: italic;
+    }
+
+    .hero-intro {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 580px;
+      margin-bottom: 40px;
+    }
+
+    .hero-links {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .hero-links a {
+      font-size: 0.95rem;
+    }
+
+    /* Stats - Casual, conversational */
+    .stats-bar {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-alt);
+    }
+
+    .stats-inner {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .stat-item {
+      text-align: center;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .stat-number {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 400;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Projects - The meat */
+    .projects {
+      padding: 80px 0;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 400;
+      margin-bottom: 48px;
+    }
+
+    .project {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      padding: 60px 0;
+      border-top: 1px solid var(--border);
+      align-items: start;
+    }
+
+    .project:first-of-type {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .project-number {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .project-title {
+      font-family: var(--serif);
+      font-size: 1.75rem;
+      margin-bottom: 16px;
+      font-weight: 400;
+    }
+
+    .project-desc {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      font-size: 1rem;
+    }
+
+    .project-story {
+      margin-bottom: 24px;
+    }
+
+    .project-story h4 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .project-story p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .project-tech {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tech-tag {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      background: var(--bg-alt);
+      border-radius: 4px;
+      color: var(--text-secondary);
+    }
+
+    .project-link {
+      font-size: 0.9rem;
+    }
+
+    .project-visual {
+      position: relative;
+    }
+
+    .project-metrics {
+      background: var(--bg-alt);
+      border-radius: 12px;
+      padding: 32px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .metric-row:first-child {
+      padding-top: 0;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .metric-value {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+    }
+
+    .metric-value.green { color: var(--green); }
+    .metric-value.orange { color: var(--orange); }
+    .metric-value.blue { color: var(--accent); }
+
+    /* How I work section */
+    .how-section {
+      padding: 80px 0;
+      background: var(--bg-alt);
+    }
+
+    .how-content {
+      max-width: 680px;
+    }
+
+    .how-content p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+
+    .how-content p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .code-block {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 24px;
+      border-radius: 8px;
+      margin: 32px 0;
+      overflow-x: auto;
+      line-height: 1.8;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: var(--sans);
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    .code-comment {
+      color: #6a9955;
+    }
+
+    .code-keyword {
+      color: #569cd6;
+    }
+
+    .code-string {
+      color: #ce9178;
+    }
+
+    /* About snippet */
+    .about {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 60px;
+    }
+
+    .about-left h3 {
+      font-family: var(--serif);
+      font-size: 1.75rem;
+      font-weight: 400;
+      margin-bottom: 20px;
+    }
+
+    .about-left p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    .about-right {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    .about-block h4 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .about-block ul {
+      list-style: none;
+    }
+
+    .about-block li {
+      padding: 6px 0;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    /* CTA */
+    .cta {
+      padding: 100px 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .cta-title {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      margin-bottom: 20px;
+    }
+
+    .cta-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+    }
+
+    .cta-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-copy {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .project {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .about-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .about-right {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 60px 0 40px;
+      }
+
+      .nav-links {
+        gap: 16px;
+      }
+    }
+
+    /* Subtle animations - only where they add meaning */
+    .project {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .project.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Easter egg hover on project metrics */
+    .metric-row:hover .metric-value {
+      letter-spacing: 0.02em;
+      transition: letter-spacing 0.3s ease;
+    }
+  </style>
 </head>
 <body>
-  <div class="bg-gradient"></div>
-  
-  <!-- Header -->
-  <header>
-    <div class="container">
-      <div class="header-content">
-        <div class="logo">⚡ n8n Portfolio</div>
-        <nav class="nav-links">
-          <a href="#workflows">Workflows</a>
-          <a href="#details">Details</a>
-          <a href="https://github.com/Goutam-aswani/N8N-workflows" target="_blank">GitHub</a>
-        </nav>
+  <nav>
+    <div class="container nav-inner">
+      <a href="#" class="nav-name">Goutam Aswani</a>
+      <div class="nav-links">
+        <a href="#projects">Work</a>
+        <a href="#about">About</a>
+        <a href="https://github.com/Goutam-aswani/N8N-workflows" target="_blank">GitHub</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">☀ / ☾</button>
       </div>
     </div>
-  </header>
+  </nav>
 
-  <!-- Hero Section -->
   <section class="hero">
     <div class="container">
-      <h1>Automation that <span>Just Works</span></h1>
-      <p>Production-ready n8n workflows that save hours, eliminate errors, and scale with your needs. Real solutions to real problems.</p>
-      <div class="cta-buttons">
-        <a href="#workflows" class="btn btn-primary">View Workflows</a>
-        <a href="https://github.com/Goutam-aswani/N8N-workflows" class="btn btn-secondary" target="_blank">⭐ Star on GitHub</a>
+      <p class="hero-eyebrow">n8n / automation / ai agents</p>
+      <h1 class="hero-title">
+        I build workflows that do the boring stuff, 
+        so you <em>don't have to</em>
+      </h1>
+      <p class="hero-intro">
+        I'm an automation nerd who spends way too much time thinking about 
+        how to save 5 minutes. Over the past year, I've built n8n workflows 
+        that have saved me 165+ hours. Here's what I've been working on.
+      </p>
+      <div class="hero-links">
+        <a href="#projects">See the workflows ↓</a>
+        <a href="mailto:goutamaswani43@gmail.com">Get in touch</a>
       </div>
     </div>
   </section>
 
-  <!-- Stats Section -->
-  <section class="stats" id="stats">
-    <div class="container">
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-value">165+</div>
-          <div class="stat-label">Hours Saved / Year</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">10+</div>
-          <div class="stat-label">APIs Integrated</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">4+</div>
-          <div class="stat-label">AI Models Used</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">98%</div>
-          <div class="stat-label">Accuracy Rate</div>
-        </div>
+  <section class="stats-bar">
+    <div class="container stats-inner">
+      <div class="stat-item">
+        <div class="stat-number">165+</div>
+        <div class="stat-label">hours saved / year</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">3</div>
+        <div class="stat-label">production workflows</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">4+</div>
+        <div class="stat-label">AI models integrated</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">10+</div>
+        <div class="stat-label">APIs connected</div>
       </div>
     </div>
   </section>
 
-  <!-- Workflows Overview Section -->
-  <section class="workflows" id="workflows">
+  <section class="projects" id="projects">
     <div class="container">
-      <div class="section-header">
-        <h2>Featured Workflows</h2>
-        <p>Production-ready automations solving real problems</p>
-      </div>
-      
-      <div class="workflow-grid">
-        <!-- Workflow 1: SMS Expense Tracker -->
-        <div class="workflow-card">
-          <div class="workflow-icon">💰</div>
-          <h3>SMS Expense Tracker</h3>
-          <p class="description">Auto-capture bank transactions from SMS and log to Google Sheets with AI parsing. Zero manual input.</p>
-          <div class="workflow-stats">
-            <div class="workflow-stat">
-              <span class="workflow-stat-value">30 hrs</span>
-              <span class="workflow-stat-label">Saved / Year</span>
-            </div>
-            <div class="workflow-stat">
-              <span class="workflow-stat-value">98%</span>
-              <span class="workflow-stat-label">Accuracy</span>
-            </div>
-            <div class="workflow-stat">
-              <span class="workflow-stat-value">15 min</span>
-              <span class="workflow-stat-label">Setup</span>
-            </div>
+      <p class="section-label">Selected Work</p>
+      <h2 class="section-title">Workflows I've built</h2>
+
+      <!-- Project 1 -->
+      <div class="project">
+        <div class="project-info">
+          <p class="project-number">01</p>
+          <h3 class="project-title">SMS Expense Tracker</h3>
+          <p class="project-desc">
+            I got tired of logging expenses manually. Now my bank SMS gets 
+            parsed by AI and logged to Google Sheets automatically. Takes 
+            about 2 seconds per transaction instead of... never getting done.
+          </p>
+          
+          <div class="project-story">
+            <h4>The problem</h4>
+            <p>
+              Like most people, I never logged my transactions consistently. 
+              By the end of the month, I had no idea where my money went.
+            </p>
           </div>
-          <div class="tech-stack">
+          
+          <div class="project-story">
+            <h4>How it works</h4>
+            <p>
+              Bank SMS → Webhook → Gemini AI parses amount, merchant, type 
+              → Routes to correct column → Google Sheets. Groq as fallback 
+              when Gemini is being slow.
+            </p>
+          </div>
+
+          <div class="project-tech">
             <span class="tech-tag">n8n</span>
-            <span class="tech-tag">Gemini AI</span>
+            <span class="tech-tag">Gemini</span>
             <span class="tech-tag">Groq</span>
-            <span class="tech-tag">Google Sheets</span>
+            <span class="tech-tag">Sheets</span>
+          </div>
+
+          <a href="https://github.com/Goutam-aswani/N8N-workflows/tree/main/workflows/1-sms-expense-tracker" class="project-link" target="_blank">
+            View on GitHub →
+          </a>
+        </div>
+        
+        <div class="project-visual">
+          <div class="project-metrics">
+            <div class="metric-row">
+              <span class="metric-label">Time saved</span>
+              <span class="metric-value green">30 hrs/yr</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Accuracy</span>
+              <span class="metric-value blue">98%</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Setup time</span>
+              <span class="metric-value">15 min</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Manual input</span>
+              <span class="metric-value green">Zero</span>
+            </div>
           </div>
         </div>
+      </div>
 
-        <!-- Workflow 2: LinkedIn Automation -->
-        <div class="workflow-card">
-          <div class="workflow-icon">📝</div>
-          <h3>LinkedIn Content Automation</h3>
-          <p class="description">Transform YouTube videos into engaging LinkedIn posts. AI relevance filtering + WhatsApp approval flow.</p>
-          <div class="workflow-stats">
-            <div class="workflow-stat">
-              <span class="workflow-stat-value">45 min</span>
-              <span class="workflow-stat-label">Per Post</span>
-            </div>
-            <div class="workflow-stat">
-              <span class="workflow-stat-value">1/day</span>
-              <span class="workflow-stat-label">Output</span>
-            </div>
-            <div class="workflow-stat">
-              <span class="workflow-stat-value">20 min</span>
-              <span class="workflow-stat-label">Setup</span>
-            </div>
+      <!-- Project 2 -->
+      <div class="project">
+        <div class="project-info">
+          <p class="project-number">02</p>
+          <h3 class="project-title">LinkedIn Content Automation</h3>
+          <p class="project-desc">
+            I watch tech videos anyway. This turns those into LinkedIn posts. 
+            AI checks if it's relevant to my niche, writes a draft, and 
+            asks me on WhatsApp to approve before posting.
+          </p>
+          
+          <div class="project-story">
+            <h4>The problem</h4>
+            <p>
+              Writing consistent LinkedIn content takes forever. I'd spend 
+              45 minutes on a single post, then get inconsistent for weeks.
+            </p>
           </div>
-          <div class="tech-stack">
+          
+          <div class="project-story">
+            <h4>How it works</h4>
+            <p>
+              YouTube video → Extract transcript → AI checks relevance → 
+              Generates post in my writing style → WhatsApp for approval → 
+              Posts to LinkedIn. Smart chunking for long videos.
+            </p>
+          </div>
+
+          <div class="project-tech">
             <span class="tech-tag">n8n</span>
             <span class="tech-tag">YouTube API</span>
-            <span class="tech-tag">Gemini AI</span>
+            <span class="tech-tag">Gemini</span>
+            <span class="tech-tag">WhatsApp</span>
             <span class="tech-tag">LinkedIn</span>
           </div>
-        </div>
 
-        <!-- Workflow 3: LinkedIn Job Post Outreach -->
-        <div class="workflow-card">
-          <div class="workflow-icon">💼</div>
-          <h3>LinkedIn Job Post Outreach</h3>
-          <p class="description">Find hidden job opportunities by scraping LinkedIn posts. AI filters hiring posts and generates personalized outreach messages.</p>
-          <div class="workflow-stats">
-            <div class="workflow-stat">
-              <span class="workflow-stat-value">90+ hrs</span>
-              <span class="workflow-stat-label">Saved / Month</span>
+          <a href="https://github.com/Goutam-aswani/N8N-workflows/tree/main/workflows/2-linkedin-automation" class="project-link" target="_blank">
+            View on GitHub →
+          </a>
+        </div>
+        
+        <div class="project-visual">
+          <div class="project-metrics">
+            <div class="metric-row">
+              <span class="metric-label">Time per post</span>
+              <span class="metric-value green">~2 min</span>
             </div>
-            <div class="workflow-stat">
-              <span class="workflow-stat-value">10-15</span>
-              <span class="workflow-stat-label">Leads / Day</span>
+            <div class="metric-row">
+              <span class="metric-label">vs manual</span>
+              <span class="metric-value orange">45 min</span>
             </div>
-            <div class="workflow-stat">
-              <span class="workflow-stat-value">25 min</span>
-              <span class="workflow-stat-label">Setup</span>
+            <div class="metric-row">
+              <span class="metric-label">Post output</span>
+              <span class="metric-value blue">1/day</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Setup time</span>
+              <span class="metric-value">20 min</span>
             </div>
           </div>
-          <div class="tech-stack">
+        </div>
+      </div>
+
+      <!-- Project 3 -->
+      <div class="project">
+        <div class="project-info">
+          <p class="project-number">03</p>
+          <h3 class="project-title">LinkedIn Job Post Outreach</h3>
+          <p class="project-desc">
+            Most jobs are announced in posts before they hit job boards. 
+            This scrapes LinkedIn, filters hiring posts with AI, and writes 
+            personalized outreach messages. I just approve and send.
+          </p>
+          
+          <div class="project-story">
+            <h4>The problem</h4>
+            <p>
+              The official job board is a graveyard of old listings. 
+              The real opportunities are in posts from hiring managers, 
+              but tracking those manually is a full-time job.
+            </p>
+          </div>
+          
+          <div class="project-story">
+            <h4>How it works</h4>
+            <p>
+              Scheduled scrape every 6 hours → AI classifies hiring vs noise → 
+              Extracts contact info → Generates personalized message using 
+              my background → WhatsApp approval → Tracks everything in Sheets.
+            </p>
+          </div>
+
+          <div class="project-tech">
             <span class="tech-tag">n8n</span>
             <span class="tech-tag">Groq</span>
             <span class="tech-tag">OpenRouter</span>
-            <span class="tech-tag">Google Sheets</span>
+            <span class="tech-tag">WhatsApp</span>
+            <span class="tech-tag">Sheets</span>
+          </div>
+
+          <a href="https://github.com/Goutam-aswani/N8N-workflows/tree/main/workflows/3-Linkedin-posts-outreach" class="project-link" target="_blank">
+            View on GitHub →
+          </a>
+        </div>
+        
+        <div class="project-visual">
+          <div class="project-metrics">
+            <div class="metric-row">
+              <span class="metric-label">Time saved</span>
+              <span class="metric-value green">90+ hrs/mo</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Leads per day</span>
+              <span class="metric-value blue">10-15</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">AI accuracy</span>
+              <span class="metric-value">85%</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Setup time</span>
+              <span class="metric-value">25 min</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Detailed Workflow Sections -->
-  <section class="workflow-details" id="details">
+  <section class="how-section">
     <div class="container">
-      <div class="section-header">
-        <h2>How They Work</h2>
-        <p>Detailed breakdown of each automation</p>
-      </div>
-
-      <!-- SMS Expense Tracker Detail -->
-      <div class="workflow-detail">
-        <div class="workflow-detail-header">
-          <div class="workflow-icon" style="background: rgba(16, 185, 129, 0.15);">💰</div>
-          <h3>SMS Expense Tracker</h3>
-        </div>
+      <p class="section-label">How I think</p>
+      <h2 class="section-title">My approach to automation</h2>
+      
+      <div class="how-content">
+        <p>
+          I don't believe in automating everything. Some things are better 
+          done by hand—the creative work, the relationship building, the 
+          thinking. But data entry? Scheduling? Scraping? Those are a 
+          waste of human attention.
+        </p>
         
-        <div class="workflow-detail-content">
-          <div class="workflow-info">
-            <h4>The Problem</h4>
-            <p>Manual expense tracking is tedious and error-prone. Most people don't log transactions consistently, leading to incomplete financial records and hours wasted on monthly reconciliation.</p>
-            
-            <h4>The Solution</h4>
-            <ul class="feature-list">
-              <li>Webhook receives SMS from bank notifications in real-time</li>
-              <li>Gemini AI parses transaction details (amount, merchant, type)</li>
-              <li>Groq serves as fallback for reliability</li>
-              <li>Auto-categorizes as CREDIT or DEBIT</li>
-              <li>Logs to Google Sheets with zero manual input</li>
-            </ul>
-
-            <div class="workflow-flow">
-              <div class="workflow-flow-title">Workflow Flow</div>
-              <div class="flow-steps">
-                <span class="flow-step">📩 SMS</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">🔗 Webhook</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">🧠 AI Parse</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">🔀 Route</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">📊 Sheets</span>
-              </div>
-            </div>
-
-            <div class="impact-grid">
-              <div class="impact-item">
-                <div class="impact-value">30 hrs</div>
-                <div class="impact-label">Saved / Year</div>
-              </div>
-              <div class="impact-item">
-                <div class="impact-value">98%</div>
-                <div class="impact-label">Accuracy</div>
-              </div>
-              <div class="impact-item">
-                <div class="impact-value">15 min</div>
-                <div class="impact-label">Setup Time</div>
-              </div>
-            </div>
-
-            <div class="workflow-cta">
-              <a href="https://github.com/Goutam-aswani/N8N-workflows/tree/main/workflows/1-sms-expense-tracker" class="btn btn-primary btn-small" target="_blank">View on GitHub</a>
-            </div>
-          </div>
-
-          <div class="workflow-screenshot">
-            <img src="workflows/1-sms-expense-tracker/screenshots/workflow.png" alt="SMS Expense Tracker">
-            <div class="screenshot-caption">SMS → AI Parsing → Google Sheets automation flow</div>
-          </div>
+        <div class="code-block">
+          <span class="code-comment">// My automation philosophy</span><br>
+          <span class="code-keyword">if</span> (task.isRepetitive && task.frequency > <span class="code-string">"weekly"</span>) {<br>
+          &nbsp;&nbsp;<span class="code-keyword">return</span> automate(task);<br>
+          }<br><br>
+          <span class="code-comment">// Always keep humans in the loop for decisions</span><br>
+          workflow.addStep(<span class="code-string">"whatsapp_approval"</span>);
         </div>
+
+        <p>
+          Every workflow I build has a human approval step. I don't trust 
+          AI to make decisions for me—but I do trust it to do the prep 
+          work so I can make better decisions faster.
+        </p>
       </div>
-
-      <!-- LinkedIn Automation Detail -->
-      <div class="workflow-detail">
-        <div class="workflow-detail-header">
-          <div class="workflow-icon" style="background: rgba(102, 126, 234, 0.15);">📝</div>
-          <h3>LinkedIn Content Automation</h3>
-        </div>
-        
-        <div class="workflow-detail-content">
-          <div class="workflow-info">
-            <h4>The Problem</h4>
-            <p>Creating consistent LinkedIn content is time-consuming. Watching videos, extracting insights, formatting posts, and publishing takes 45+ minutes per post — leading to inconsistent posting and missed opportunities.</p>
-            
-            <h4>The Solution</h4>
-            <ul class="feature-list">
-              <li>Tracks YouTube videos you watch via webhook</li>
-              <li>Extracts transcripts automatically</li>
-              <li>AI filters for relevance to your niche (AI/ML/Tech)</li>
-              <li>Smart chunking for long videos</li>
-              <li>Generates engaging posts with casual, storytelling tone</li>
-              <li>WhatsApp approval before auto-posting to LinkedIn</li>
-            </ul>
-
-            <div class="workflow-flow">
-              <div class="workflow-flow-title">Workflow Flow</div>
-              <div class="flow-steps">
-                <span class="flow-step">🎬 YouTube</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">📝 Transcript</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">🎯 Filter</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">✍️ AI Post</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">📱 Approve</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">💼 LinkedIn</span>
-              </div>
-            </div>
-
-            <div class="impact-grid">
-              <div class="impact-item">
-                <div class="impact-value">45 min</div>
-                <div class="impact-label">Saved / Post</div>
-              </div>
-              <div class="impact-item">
-                <div class="impact-value">1/day</div>
-                <div class="impact-label">Post Output</div>
-              </div>
-              <div class="impact-item">
-                <div class="impact-value">20 min</div>
-                <div class="impact-label">Setup Time</div>
-              </div>
-            </div>
-
-            <div class="workflow-cta">
-              <a href="https://github.com/Goutam-aswani/N8N-workflows/tree/main/workflows/2-linkedin-automation" class="btn btn-primary btn-small" target="_blank">View on GitHub</a>
-            </div>
-          </div>
-
-          <div class="workflow-screenshot">
-            <img src="workflows/2-linkedin-automation/screenshots/workflow.png" alt="LinkedIn Content Automation">
-            <div class="screenshot-caption">YouTube → AI Analysis → LinkedIn publishing pipeline</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- LinkedIn Job Post Outreach Detail -->
-      <div class="workflow-detail">
-        <div class="workflow-detail-header">
-          <div class="workflow-icon" style="background: rgba(249, 115, 22, 0.15);">💼</div>
-          <h3>LinkedIn Job Post Outreach</h3>
-        </div>
-        
-        <div class="workflow-detail-content">
-          <div class="workflow-info">
-            <h4>The Problem</h4>
-            <p>Traditional LinkedIn job boards are oversaturated with outdated listings. Many companies announce hiring through personal posts first, but manually tracking and responding to these takes hours daily.</p>
-            
-            <h4>The Solution</h4>
-            <ul class="feature-list">
-              <li>Automatically scrapes LinkedIn posts every 6 hours based on search terms</li>
-              <li>AI classification filters real hiring posts from noise (85% accuracy)</li>
-              <li>Extracts contact information (emails, profiles) automatically</li>
-              <li>Generates personalized outreach messages with AI</li>
-              <li>WhatsApp approval workflow before sending</li>
-              <li>Tracks all posts and processed status in Google Sheets</li>
-            </ul>
-
-            <div class="workflow-flow">
-              <div class="workflow-flow-title">Workflow Flow</div>
-              <div class="flow-steps">
-                <span class="flow-step">⏰ Schedule</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">🔍 Scrape</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">🧠 AI Filter</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">✍️ Generate</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">📱 Approve</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">📊 Track</span>
-              </div>
-            </div>
-
-            <div class="impact-grid">
-              <div class="impact-item">
-                <div class="impact-value">90+ hrs</div>
-                <div class="impact-label">Saved / Month</div>
-              </div>
-              <div class="impact-item">
-                <div class="impact-value">10-15</div>
-                <div class="impact-label">Leads / Day</div>
-              </div>
-              <div class="impact-item">
-                <div class="impact-value">25 min</div>
-                <div class="impact-label">Setup Time</div>
-              </div>
-            </div>
-
-            <div class="workflow-cta">
-              <a href="https://github.com/Goutam-aswani/N8N-workflows/tree/main/workflows/3-Linkedin-posts-outreach" class="btn btn-primary btn-small" target="_blank">View on GitHub</a>
-            </div>
-          </div>
-
-          <div class="workflow-screenshot">
-            <img src="workflows/3-Linkedin-posts-outreach/screenshots/workflow.png" alt="LinkedIn Job Post Outreach">
-            <div class="screenshot-caption">LinkedIn scraping → AI classification → personalized outreach flow</div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </section>
 
-  <!-- Footer -->
+  <section class="about" id="about">
+    <div class="container about-grid">
+      <div class="about-left">
+        <h3>A bit about me</h3>
+        <p>
+          I'm a developer who fell into automation after realizing I was 
+          spending more time on busywork than actual work. Now I build 
+          n8n workflows that handle the boring stuff so I can focus on 
+          things that matter.
+        </p>
+      </div>
+      <div class="about-right">
+        <div class="about-block">
+          <h4>Tools I use</h4>
+          <ul>
+            <li>n8n (self-hosted)</li>
+            <li>Gemini, Groq, OpenRouter</li>
+            <li>Google Sheets API</li>
+            <li>LinkedIn API</li>
+            <li>WhatsApp Business</li>
+          </ul>
+        </div>
+        <div class="about-block">
+          <h4>What I care about</h4>
+          <ul>
+            <li>Reliability over cleverness</li>
+            <li>Human-in-the-loop design</li>
+            <li>Actually useful automation</li>
+            <li>Clean documentation</li>
+            <li>Open source</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2 class="cta-title">Want to work together?</h2>
+      <p class="cta-subtitle">
+        I'm open to freelance automation projects or just chatting about n8n.
+      </p>
+      <div class="cta-links">
+        <a href="mailto:goutamaswani43@gmail.com">goutamaswani43@gmail.com</a>
+        <a href="https://www.linkedin.com/in/goutam-aswani-bei143/" target="_blank">LinkedIn</a>
+        <a href="https://github.com/Goutam-aswani/N8N-workflows" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </section>
+
   <footer>
-    <div class="container">
+    <div class="container footer-inner">
+      <p class="footer-copy">© 2026 Goutam Aswani</p>
       <div class="footer-links">
         <a href="https://github.com/Goutam-Aswani" target="_blank">GitHub</a>
         <a href="https://www.linkedin.com/in/goutam-aswani-bei143/" target="_blank">LinkedIn</a>
         <a href="mailto:goutamaswani43@gmail.com">Email</a>
       </div>
-      <p class="footer-text">Built with ❤️ and automated with n8n</p>
     </div>
   </footer>
 
-  <!-- Lightbox Modal -->
-  <div class="lightbox" id="lightbox">
-    <span class="lightbox-close">&times;</span>
-    <img src="" alt="Workflow Screenshot" id="lightbox-img">
-  </div>
-
   <script>
-    // Lightbox functionality
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxClose = document.querySelector('.lightbox-close');
+    // Theme toggle with persistence
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    // Check for saved preference or system preference
+    const savedTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    // Click on workflow screenshot to open lightbox
-    document.querySelectorAll('.workflow-screenshot img').forEach(img => {
-      img.addEventListener('click', () => {
-        lightboxImg.src = img.src;
-        lightboxImg.alt = img.alt;
-        lightbox.classList.add('active');
-        document.body.style.overflow = 'hidden';
-      });
-    });
-    
-    // Close lightbox on click
-    lightbox.addEventListener('click', () => {
-      lightbox.classList.remove('active');
-      document.body.style.overflow = '';
-    });
-    
-    // Close on ESC key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && lightbox.classList.contains('active')) {
-        lightbox.classList.remove('active');
-        document.body.style.overflow = '';
+    if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+      html.setAttribute('data-theme', 'dark');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        html.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
       }
+    });
+
+    // Minimal animation - just fade in projects as they come into view
+    const projects = document.querySelectorAll('.project');
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    projects.forEach(p => observer.observe(p));
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     });
   </script>
 </body>
